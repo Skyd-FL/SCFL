@@ -210,6 +210,8 @@ class DDPGAgent:
                         critic_losses,
                     )
                     pass
+                scores.append(score)
+            print(f"Episode: {self.episode}=================have score {score}")
         if args.save_flag:
             save_results(
                 scores,
