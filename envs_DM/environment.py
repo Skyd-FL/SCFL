@@ -70,6 +70,7 @@ class FL_env(env_utils, env_agent_utils):
         self.coeff_c0 = 1
         self.coeff_c1 = 1
 
+        """ Generalization Gap Calculation """
         self.dataset = "mnist_data" #Choose the dataset to get the entropy value , option ["mnist_data","cifar10_dataset"]
         if self.dataset == "mnist_data":
             self.entropyH = entropy_holder.get_value("mnist_data")
@@ -81,10 +82,8 @@ class FL_env(env_utils, env_agent_utils):
             print("Invalid key")
 
         mutual_I = self.coeff_c0*np.exp(-self.coeff_c1*self.lastSample_time)
-
         self.Psi = 2**self.entropyH*np.sqrt(2*(self.entropyH - mutual_I))
         print(f"this is Psi that you need :{self.Psi}")
-
 
         """ =============== """
         """     Actions     """
