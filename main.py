@@ -1,6 +1,6 @@
 from agents.ddpg.agent import *
 from utils.setting_setup import *
-from envs.environment import *
+from envs_DM.environment import *
 
 
 def print_hi(name):

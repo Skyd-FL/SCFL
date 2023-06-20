@@ -3,7 +3,7 @@ import math
 import numpy as np
 from utils.setting_setup import *
 import scipy
-
+from dataset_est.get_entropy import *
 from envs_DM.env_utils import *
 from envs_DM.env_agent_utils import *
 
@@ -66,7 +66,24 @@ class DRGO_env(env_utils, env_agent_utils):
         self.xi = 0.1
         self.coeff = 1
         self.Time_max = args.tmax
-        self.Psi = 1
+        self.lastSample_time = 0.1
+        self.coeff_c0 = 1
+        self.coeff_c1 = 1
+
+        self.dataset = "mnist_data" #Choose the dataset to get the entropy value , option ["mnist_data","cifar10_dataset"]
+        if self.dataset == "mnist_data":
+            self.entropyH = entropy_holder.get_value("mnist_data")
+            print("Value entropy of MNIST dataset: ", self.entropyH)
+        elif self.dataset == "cifar10_dataset":
+            self.entropyH = entropy_holder.get_value("cifar10_dataset")
+            print("Value entropy of CIFAR10 dataset", self.entropyH)
+        else:
+            print("Invalid key")
+
+        mutual_I = self.coeff_c0*np.exp(-self.coeff_c1*self.lastSample_time)
+
+        self.Psi = 2**self.entropyH*np.sqrt(2*(self.entropyH - mutual_I))
+        print(f"this is Psi that you need :{self.Psi}")
 
 
         """ =============== """

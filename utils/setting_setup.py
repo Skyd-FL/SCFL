@@ -53,7 +53,7 @@ def get_arguments():
                         help="power of BS")
     parser.add_argument("--powern", type=float, default=1,
                         help="power of users")
-    parser.add_argument("--bandwidth", type=float, default=100,
+    parser.add_argument("--bandwidth", type=float, default=20e6,
                         help="signal bandwidth")
 
     """ ======================================================== """
@@ -61,7 +61,7 @@ def get_arguments():
     """ ======================================================== """
     parser.add_argument("--memory-size", type=int, default=10000,
                         help="size of the replay memory")
-    parser.add_argument("--batch-size", type=int, default=128,
+    parser.add_argument("--batch-size", type=int, default=256,
                         help="data batch size")
     parser.add_argument("--ou-theta", type=float, default=1.0,
                         help="ou noise theta")
@@ -73,7 +73,7 @@ def get_arguments():
                         help="discount factor")
     parser.add_argument("--tau", type=float, default=5e-3,
                         help="initial random steps")
-    parser.add_argument("--max-episode", type=int, default=100,
+    parser.add_argument("--max-episode", type=int, default=50,
                         help="max episode")
     parser.add_argument("--max-step", type=int, default=500,
                         help="max number of step per episode")
