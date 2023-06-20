@@ -35,6 +35,8 @@ def get_arguments():
                         help="Number of step needed to plot new accuracy plot")
     parser.add_argument("--save-flag", type=bool, default=True,
                         help="Save Trigger")
+    parser.add_argument("--algo", type=str, default="SAC",
+                        help="type of training agent")
 
     """ ======================================================== """
     """ ================== Environment config ================== """

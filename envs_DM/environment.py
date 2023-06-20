@@ -7,7 +7,7 @@ from dataset_est.get_entropy import *
 from envs_DM.env_utils import *
 from envs_DM.env_agent_utils import *
 
-class DRGO_env(env_utils, env_agent_utils):
+class FL_env(env_utils, env_agent_utils):
     def __init__(self, args):
         # Network setting
         self.noise = args.noise
