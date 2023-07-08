@@ -52,7 +52,7 @@ class FL_env(env_utils, env_agent_utils):
         self.C_u = np.random.uniform(low=self.low_freq,high=self.high_freq, size=self.N_User)
         self.D_u = 500
         self.gamma = 0.005
-        self.Lipschitz = 0.005
+        self.Lipschitz = args.L
         self.pen_coeff = args.pen_coeff #coeffiency of penalty defined by lamba in paper
         self.size = args.data_size
         self.kappa = 10^-28
@@ -71,11 +71,11 @@ class FL_env(env_utils, env_agent_utils):
         self.coeff_c1 = 1
 
         """ Generalization Gap Calculation """
-        self.dataset = "mnist_data" #Choose the dataset to get the entropy value , option ["mnist_data","cifar10_dataset"]
-        if self.dataset == "mnist_data":
+        self.dataset = "mnist" #Choose the dataset to get the entropy value , option ["mnist","cifar10"]
+        if self.dataset == "mnist":
             self.entropyH = entropy_holder.get_value("mnist_data")
             print("Value entropy of MNIST dataset: ", self.entropyH)
-        elif self.dataset == "cifar10_dataset":
+        elif self.dataset == "cifar10":
             self.entropyH = entropy_holder.get_value("cifar10_dataset")
             print("Value entropy of CIFAR10 dataset", self.entropyH)
         else:
@@ -126,37 +126,20 @@ class FL_env(env_utils, env_agent_utils):
         self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
 
         self.E = self._Energy()  # Generate self.T
-        # Calculate distortion rate
-        sigma_data = self.sigma_data
 
-        # We assume that it follows CLT
-        # This function can be changed in the future
-        temp_c = 20
-        # sigma_sem = np.exp(temp_c*(1-self.o)**2)
-        # sigma_tot_sqr = 1/((1/sigma_sem**2)+(1/sigma_data**2))
-
-        # Goal-oriented penalty
-        penalty1 = 0
-        penalty2 = 0
+        penalty = 0
         self.num_Iglob = self._calculateGlobalIteration()
         self.num_Iu = 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma) * np.log2(1 / self.eta_accuracy)
         self.t_trans = self._calTimeTrans()
         self.Au = self.num_Iu * self.C_u * self.D_u
-        penalty1 += self.coeff*np.sum((self.num_Iglob*(self.Au/self.f_u+self.t_trans)-self.Time_max))
-        # penalty += self.coeff*np.sum((self.eta**2 * self.Lipschitz/2 - self.eta)*\
-        #            (self.Lipschitz**2) * sigma_tot_sqr - self.acc_threshold)
-        # penalty2 += (1-self.coeff)*np.sum((1/math.sqrt(2*math.pi)) * self.inf_capacity * np.exp( -1/(4*(self.B**2)*sigma_tot_sqr)))
-        penalty2 += (1 - self.coeff)*np.sum((self.num_Iglob*(self.Au/self.f_u+self.t_trans)-self.Time_max))
+        penalty += self.coeff*np.sum((self.num_Iglob*(self.Au/self.f_u+self.t_trans)-self.Time_max))
+        penalty += (1 - self.coeff)*np.sum((self.num_Iglob*(self.Au/self.f_u+self.t_trans)-self.Time_max))
 
 
         # print(f"penalty: {penalty}")
         reward = - self.E - self.pen_coeff*penalty1
         # print(f"step: {step} --> rew: {reward} | T: {self.T}| pena: {penalty}")
-        """
-        T = 100
-        - Normally, the constraint * penalty should be around 0.01 - 0.2 of T
-        - Print and observe the distribution of the constraints -> decide the alpha
-        """
+
         if step == self.max_step:
             done = True
         else:
@@ -166,12 +149,8 @@ class FL_env(env_utils, env_agent_utils):
         return state_next, reward, done, info
 
     def reset(self):
-        # Base station initialization
+        #  System initialization
         self.BS_location = np.expand_dims(self._location_BS_Generator(), axis=0)
-
-        # Use initialization
-        # self.U_location = np.expand_dims(self._location_CU_Generator(), axis=0)
-        # self.User_trajectory = np.expand_dims(self._trajectory_U_Generator(), axis=0)
         self.U_location = self._location_CU_Generator()
         self.User_trajectory = self._trajectory_U_Generator()
         # Distance calculation
@@ -179,8 +158,6 @@ class FL_env(env_utils, env_agent_utils):
 
         # re-calculate channel gain
         self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
-
-        # Generate next state [set of ChannelGain]
         state_next = self._wrapState()
         return state_next
 
