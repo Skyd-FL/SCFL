@@ -102,7 +102,6 @@ class env_utils():
         Numerator = np.log(1/self.epsilon0_accuracy)*2*self.N_User*self.Lipschitz*self.xi
         Denominator = self.xi*(self.Lipschitz+2)*self.Psi + self.xi*self.Lipschitz/self.N_User - self.eta_accuracy*self.gamma
         return Numerator/Denominator
-
     def _calTimeTrans(self):
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
         return np.divide(self.size, self.DataRate)
