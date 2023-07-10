@@ -8,7 +8,7 @@ import torch
 from agents.sac.agent_sac import *
 from agents.ddpg.agent import *
 
-from agents.sac.modules.relay_memory import *
+from agents.sac.modules.replay_memory import *
 from envs_DM.environment import *
 from envs.env_utils import *
 from envs.env_agent_utils import *
