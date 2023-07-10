@@ -37,9 +37,7 @@ class DDPGAgent:
     ):
         """Initialize."""
         self.obs_dim = env.observation_space.shape[0]
-        # print(f"env shape: {env.observation_space.shape}")
         self.action_dim = env.action_space.shape[1]
-        # print(f"action shape: {env.action_space.shape}")
 
         self.memory_size = args.memory_size
         self.batch_size = args.batch_size
@@ -149,14 +147,12 @@ class DDPGAgent:
 
         # train actor
         actor_loss = -self.critic(state, self.actor(state)).mean()
-        # print(f"return: {curr_return}|criticL: {critic_loss}|actorL{actor_loss}")
         self.actor_optimizer.zero_grad()
         actor_loss.backward()
         self.actor_optimizer.step()
 
         # target update
         self._target_soft_update()
-        # print(f"criticL:{critic_loss}|actorL:{actor_loss}")
 
         return actor_loss.data, critic_loss.data
 
