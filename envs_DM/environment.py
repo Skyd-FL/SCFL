@@ -15,10 +15,9 @@ class FL_env(env_utils, env_agent_utils):
         self.N_User = args.user_num
         self.G_CU_list = np.ones((self.N_User, 1))  # User directivity
         self.G_BS_t = 1  # BS directivity
-        self.Z_u = 10000  # Data size
         self.Num_BS = 1  # Number of Base Stations
-        self.N_User = 10  # Number of Users
         self.max_step = args.max_step
+        self.Z_u = 10000  # Data size
 
         # Power setting
         self.P = args.power
@@ -36,17 +35,7 @@ class FL_env(env_utils, env_agent_utils):
         self.BS_R_Range = 1
         self.BS_R_min = 0.1
 
-        # Goal-oriented Settings
-        self.acc_threshold = 0.05
-        self.Lipschitz = 0.005
-        self.inf_capacity = 0.9
-        self.pen_coeff = args.pen_coeff
-
-        self.sigma_data = 0.01
-        self.semantic_mode = args.semantic_mode
-
         # DM initialization
-
         self.low_freq = args.low_freq
         self.high_freq = args.high_freq
         self.C_u = np.random.uniform(low=self.low_freq,high=self.high_freq, size=self.N_User)
