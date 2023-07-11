@@ -12,16 +12,13 @@ class env_agent_utils():
 
     def _wrapState(self):
         self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
-        state = np.concatenate((np.array(self.ChannelGain).reshape(1, -1), np.array(self.U_location).reshape(1, -1),
-                                np.array(self.User_trajectory).reshape(1, -1)), axis=1)
+        state = np.array(self.ChannelGain)
         return state
 
     def _decomposeState(self, state):
         H = state[0: self.N_User]
-        U_location = state[self.N_User: 2 * self.N_User + 2]
-        User_trajectory = state[self.N_User + 2: 2 * self.N_User + 4]
         return [
-            np.array(H), np.array(U_location), np.array(User_trajectory)
+            np.array(H)
         ]
 
     def _wrapAction(self):
@@ -31,18 +28,18 @@ class env_agent_utils():
         return action
 
     def _decomposeAction(self, action):
-        # make output for resource allocation beta (range: [0,P_u_max])
-        # make output for power (range: [0,1])
-        # make output for compression ratio: (range: [0,1])
+        # beta :
+        # f_u  : maximum local computation capacity of user u
+        # p_u  : maximum power of user u
+        # butt : local accuracy of users
+        # tau  : sampling delay
         beta = action[0][0: self.N_User].astype(float)
         beta = scipy.special.softmax(beta, axis=None)
 
         f_u = action[0][self.N_User: 2 * self.N_User].astype(float)
         p_u = (action[0][2 * self.N_User: 3 * self.N_User].astype(float))*self.p_u_max
-
-        # print(f"beta: {beta}")
-        # print(f"f_u: {o}")
-        # print(f"p_u: {P_n}")
+        butt = 0
+        tau  = 0
 
         return [
             np.array(beta).reshape((1,self.N_User)),
