@@ -33,7 +33,7 @@ class env_utils():
             # print(U_location)
         return U_location
 
-    def _trajectory_U_Generator(self):
+    def _trajectory_U_Generator(self)
         userList = []
         for i in range(self.N_User):
             theta = 0
