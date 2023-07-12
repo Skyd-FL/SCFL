@@ -177,7 +177,6 @@ class DDPGAgent:
                 self.total_step += 1
                 action = self.select_action(state)
                 state_next, reward, done, info = self.step(action)
-                # state_next = state_next.squeeze()
                 state = state_next
 
                 score = score + reward
@@ -220,7 +219,6 @@ class DDPGAgent:
                   self.actor.state_dict(),
                   self.critic.state_dict(),
                   algo_name)
-        self.env.close()
 
     def test(self):
         # """Test the agent."""
