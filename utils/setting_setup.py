@@ -52,14 +52,8 @@ def get_arguments():
                         help="number of users")
     parser.add_argument("--lamda", type=float, default=0.001,
                         help="signal wave length")
-    parser.add_argument("--power", type=float, default=1,
-                        help="max power of BS threshold")
-    parser.add_argument("--poweru_max", type=float, default=10,
+    parser.add_argument("--poweru-max", type=float, default=10,
                         help="max power of user threshold")
-    parser.add_argument("--power0", type=float, default=1,
-                        help="power of BS")
-    parser.add_argument("--powern", type=float, default=1,
-                        help="power of users")
     parser.add_argument("--bandwidth", type=float, default=20e6,
                         help="signal bandwidth")
     parser.add_argument("--L", type=float, default=50,
@@ -86,8 +80,10 @@ def get_arguments():
                         help="max episode")
     parser.add_argument("--max-step", type=int, default=500,
                         help="max number of step per episode")
-    parser.add_argument("--semantic-mode", type=str, default="learn",
-                        help="learn | infer")
+    parser.add_argument("--max-episode-eval", type=int, default=5,
+                        help="max evaluation episode")
+    parser.add_argument("--max-step-eval", type=int, default=200,
+                        help="max number of evaluation step per episode")
     parser.add_argument("--pen-coeff", type=float, default=0,
                         help="coefficient for penalty")
 
@@ -112,8 +108,10 @@ def get_arguments():
     parser.add_argument('--automatic_entropy_tuning', type=bool, default=False,
                         metavar='G',
                         help='Automaically adjust α (default: False)')
-    parser.add_argument('--lr', type=float, default=0.0003, metavar='G',
-                        help='learning rate (default: 0.0003)')
+    parser.add_argument("--lr-actor", type=float, default=3e-4,
+                        help="learning rate for actor")
+    parser.add_argument("--lr-critic", type=float, default=1e-3,
+                        help="learning rate for critic")
     parser.add_argument('--hidden_size', type=int, default=128,
                         metavar='N',
                         help='hidden size (default: 256)')
