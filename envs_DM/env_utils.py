@@ -90,11 +90,18 @@ class env_utils():
                       self.xi*self.Lipschitz/self.N_User - self.eta_accuracy*self.gamma
         return Numerator/Denominator
 
+    def _calculateLocalIteration(self):
+        return 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma) * np.log2(1 / self.eta_accuracy)
+
     def _calTimeTrans(self):
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
         return np.divide(self.size, self.DataRate)
 
     def _Energy(self):
+        """
+        Intermediate Energy
+        :return:
+        """
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
         #Calculate computation energy
         self.num_Iu = 2/((2-self.Lipschitz*self.delta) * self.delta * self.gamma) * np.log2(1/self.eta_accuracy)
@@ -102,7 +109,5 @@ class env_utils():
         # Calculate transmission energy
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u,self.t_trans)
-        #Calculate total energy
-        self.num_Iglob =  self._calculateGlobalIteration()
 
-        return self.num_Iglob*(np.sum(self.EC_u)+np.sum(self.ET_u))
+        return np.sum(self.EC_u)+np.sum(self.ET_u)
