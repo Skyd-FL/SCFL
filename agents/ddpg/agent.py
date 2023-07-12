@@ -165,7 +165,6 @@ class DDPGAgent:
         """Train the agent."""
         for self.episode in range(1, num_ep + 1):
             self.is_test = False
-
             state = self.env.reset()
 
             actor_losses = []
@@ -178,7 +177,9 @@ class DDPGAgent:
                 action = self.select_action(state)
                 state_next, reward, done, info = self.step(action)
                 state = state_next
-
+                # The max_step should be the total communication rounds
+                if self.env.num_Iglob < args.max_step:
+                    num_frames = self.env.num_Iglob
                 score = score + reward
                 # if episode ends
                 if done:
@@ -206,7 +207,7 @@ class DDPGAgent:
                     )
                     pass
                 scores.append(score)
-            print(f"Episode: {self.episode}=================have score {score}")
+            print(f"Episode: {self.episode} ================= have score {score}")
         if args.save_flag:
             save_results(
                 scores,
@@ -265,7 +266,6 @@ class DDPGAgent:
             critic_losses: List[float],
     ):
         """Plot the training progresses."""
-
         def subplot(loc: int, title: str, values: List[float]):
             plt.subplot(loc)
             plt.title(title)
