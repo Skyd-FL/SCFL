@@ -7,7 +7,7 @@ from dataset_est.get_entropy import *
 from envs_DM.env_utils import *
 from envs_DM.env_agent_utils import *
 
-class FL_env(env_utils, env_agent_utils):
+class SCFL_env(env_utils, env_agent_utils):
     def __init__(self, args):
         # Network setting
         self.noise = args.noise
@@ -113,7 +113,6 @@ class FL_env(env_utils, env_agent_utils):
         state_next = self._wrapState()
         # Re-calculate channel gain
         self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
-
         self.E = self._Energy()  # Generate self.T
 
         penalty = 0
@@ -123,17 +122,11 @@ class FL_env(env_utils, env_agent_utils):
         self.Au = self.num_Iu * self.C_u * self.D_u
         penalty += self.coeff*np.sum((self.num_Iglob*(self.Au/self.f_u+self.t_trans)-self.Time_max))
         penalty += (1 - self.coeff)*np.sum((self.num_Iglob*(self.Au/self.f_u+self.t_trans)-self.Time_max))
-
-
-        # print(f"penalty: {penalty}")
         reward = - self.E - self.pen_coeff*penalty1
-        # print(f"step: {step} --> rew: {reward} | T: {self.T}| pena: {penalty}")
-
         if step == self.max_step:
             done = True
         else:
             done = False
-
         info = None
         return state_next, reward, done, info
 
@@ -150,10 +143,7 @@ class FL_env(env_utils, env_agent_utils):
         state_next = self._wrapState()
         return state_next
 
-    def close(self):
-        pass
-
 
 if __name__ == '__main__':
     args = get_arguments()
-    env = DRGO_env(args)
+    env = SCFL_env(args)
