@@ -77,9 +77,6 @@ class SCFL_env(env_utils, env_agent_utils):
         """     Actions     """
         """ =============== """
         self.beta = np.random.randint(0, self.N_User, size=[self.N_User, 1])
-        # eta is AP-Allocation. It is an array with form of Num_Nodes interger number,
-        # value change from [0:Num_APs-1] (0 means Sub#1)
-        # self.f_u = np.reshape((self._round(np.random.uniform(self.low_freq,self.high_freq, (1, self.N_User)),self.unit)), (self.N_User, 1))
         self.f_u = np.reshape((np.random.rand(1, self.N_User) * self.f_u_max), (self.N_User, 1))
         self.p_u = np.reshape((np.random.rand(1, self.N_User) * self.p_u_max), (self.N_User, 1))
 
@@ -120,8 +117,7 @@ class SCFL_env(env_utils, env_agent_utils):
 
         # Penalty 1:
         penalty += max(np.sum(((self.Au/self.f_u+self.t_trans)-self.Time_max)),0)
-
-        reward = - self.E - self.pen_coeff*penalty1
+        reward = - self.E + self.pen_coeff*penalty1
 
         if step == self.max_step:
             done = True
