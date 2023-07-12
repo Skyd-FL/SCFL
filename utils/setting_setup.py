@@ -41,6 +41,11 @@ def get_arguments():
     """ ======================================================== """
     """ ================== Environment config ================== """
     """ ======================================================== """
+    parser.add_argument("--ai-network", type=str, default="cnn",
+                        help="AI network type")
+    parser.add_argument("--drl-algo", choices=['ddpg-ei', 'ddpg'],
+                        default='ddpg-ei',
+                        help="choice of DRL algorithm")
     parser.add_argument("--noise", type=float, default=0.01,
                         help="network noise")
     parser.add_argument("--user-num", type=int, default=10,
@@ -57,6 +62,8 @@ def get_arguments():
                         help="power of users")
     parser.add_argument("--bandwidth", type=float, default=20e6,
                         help="signal bandwidth")
+    parser.add_argument("--L", type=float, default=50,
+                        help="Lipschitz smooth variables")
 
     """ ======================================================== """
     """ ===================== Agent config ===================== """
