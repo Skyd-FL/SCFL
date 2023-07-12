@@ -75,8 +75,8 @@ class DDPGAgent:
         self.critic_target.load_state_dict(self.critic.state_dict())
 
         # optimizer
-        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=3e-4)
-        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=1e-3)
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=args.lr_actor)
+        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=args.lr_critic)
 
         # transition to store in memory
         self.transition = list()
