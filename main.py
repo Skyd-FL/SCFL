@@ -19,7 +19,7 @@ from utils.result_utils import *
 
 args = get_arguments()
 
-env = FL_env(args)
+env = SCFL_env(args)
 
 if args.algo == "DDPG":
     agent = DDPGAgent(
