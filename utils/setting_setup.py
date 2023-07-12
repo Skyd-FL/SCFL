@@ -133,6 +133,6 @@ def get_arguments():
                         help='Local accuracy of system (default: 0.01)')
     parser.add_argument('--epsilon0_accuracy', type=float, default=0.01, metavar='global_accuracy',
                         help='Global accuracy of system (default: 0.01)')
-    parser.add_argument('--tmax', type=int, default=1000, metavar='T_max',
+    parser.add_argument('--tmax', type=int, default=10, metavar='T_max',
                         help='Upper bound of time completion (default: 1000)')
     return parser.parse_args()
