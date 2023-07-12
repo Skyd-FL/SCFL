@@ -42,22 +42,20 @@ class SCFL_env(env_utils, env_agent_utils):
         self.D_u = 500
         self.gamma = 0.005
         self.Lipschitz = args.L
-        self.pen_coeff = args.pen_coeff #coeffiency of penalty defined by lamba in paper
-        self.size = args.data_size
+        self.pen_coeff = args.pen_coeff # coeffiency of penalty defined by lamba in paper
+        self.data_size = args.data_size
         self.kappa = 10^-28
         self.p_u_max = args.poweru_max
         self.f_u_max = args.f_u_max
         self.B = args.Bandwidth
-        self.eta_accuracy = args.eta_accuracy
-        self.epsilon0_accuracy = args.epsilon0_accuracy
+        self.eta_accuracy = args.eta_accuracy               # target local accuracy
+        self.epsilon0_accuracy = args.epsilon0_accuracy     # target global accuracy
         self.unit = 0.25
         self.delta = 0.1
         self.xi = 0.1
         self.coeff = 1
-        self.Time_max = args.tmax
+        self.Time_max = args.tmax                           # max time per round
         self.lastSample_time = 0.1
-        self.coeff_c0 = 1
-        self.coeff_c1 = 1
 
         """ Generalization Gap Calculation """
         self.dataset = "mnist" #Choose the dataset to get the entropy value , option ["mnist","cifar10"]
@@ -69,7 +67,8 @@ class SCFL_env(env_utils, env_agent_utils):
             print("Value entropy of CIFAR10 dataset", self.entropyH)
         else:
             print("Invalid key")
-
+        self.coeff_c0 = self.entropyH
+        self.coeff_c1 = 1
         mutual_I = self.coeff_c0*np.exp(-self.coeff_c1*self.lastSample_time)
         self.Psi = 2**self.entropyH*np.sqrt(2*(self.entropyH - mutual_I))
         print(f"this is Psi that you need :{self.Psi}")
@@ -105,24 +104,25 @@ class SCFL_env(env_utils, env_agent_utils):
 
 
     def step(self, action, step):
-        self.beta, self.f_u, self.p_u = self._decomposeAction(action)
+        penalty = 0
+        self.beta, self.f_u, self.p_u = self._decomposeAction(action)     #
         # Environment change
         self.User_trajectory = np.expand_dims(self._trajectory_U_Generator(), axis=0)
         self.U_location = self.User_trajectory + self.U_location
-        # State wrap
-        state_next = self._wrapState()
-        # Re-calculate channel gain
-        self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
-        self.E = self._Energy()  # Generate self.T
+        state_next = self._wrapState()                                    # State wrap
 
-        penalty = 0
-        self.num_Iglob = self._calculateGlobalIteration()
-        self.num_Iu = 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma) * np.log2(1 / self.eta_accuracy)
-        self.t_trans = self._calTimeTrans()
-        self.Au = self.num_Iu * self.C_u * self.D_u
-        penalty += self.coeff*np.sum((self.num_Iglob*(self.Au/self.f_u+self.t_trans)-self.Time_max))
-        penalty += (1 - self.coeff)*np.sum((self.num_Iglob*(self.Au/self.f_u+self.t_trans)-self.Time_max))
+        self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)  # Re-calculate channel gain
+        self.E = self._Energy()                                           # Energy
+        self.num_Iglob = self._calculateGlobalIteration()                 # Global Iterations
+        self.num_Iu = self._calculateLocalIteration()                     # Local Iterations
+        self.t_trans = self._calTimeTrans()                               # Transmission Time
+        self.Au = self.num_Iu * self.C_u * self.D_u                       # Iterations x Cycles x Samples
+
+        # Penalty 1:
+        penalty += max(np.sum(((self.Au/self.f_u+self.t_trans)-self.Time_max)),0)
+
         reward = - self.E - self.pen_coeff*penalty1
+
         if step == self.max_step:
             done = True
         else:
