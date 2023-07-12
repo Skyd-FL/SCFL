@@ -123,7 +123,7 @@ def get_arguments():
                         help='min number of CPU cycles needed to compute one sample data (default: 10000)')
     parser.add_argument('--high_freq', type=int, default=30000, metavar='C_u_max',
                         help='max number of CPU cycles needed to compute one sample data (default: 30000)')
-    parser.add_argument('--data_size', type=float, default=28.1*1024, metavar='size',
+    parser.add_argument('--data-size', type=float, default=28.1*1024, metavar='size',
                         help='Data size of user to transmit [bit] (default: 30000)')
     parser.add_argument('--Bandwidth', type=float, default=20e6, metavar='system_bandwidth',
                         help='Bandwidth of system [Hz] (default: 20e6)')
