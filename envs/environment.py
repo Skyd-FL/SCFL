@@ -18,6 +18,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.Num_BS = 1  # Number of Base Stations
         self.max_step = args.max_step
         self.Z_u = 10000  # Data size
+        self.sigma_data = 0.01
 
         # Power setting
         self.p_u_max = args.poweru_max
