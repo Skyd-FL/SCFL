@@ -45,17 +45,8 @@ class env_utils():
             User_trajectory = np.array(userList)
         return User_trajectory
 
-
     def _distance_Calculated(self, A, B):
         return np.array([np.sqrt(np.sum((A - B) ** 2, axis=1))]).transpose()
-
-    # def _distance_Calculated(self):
-    #       dist = np.zeros((self.Num_BS, self.N_User))
-    #       for i in range(self.Num_BS):
-    #           for j in range(self.N_User):
-    #               dist[i][j] = np.sqrt(np.sum(self.BS_location[i]-self.U_location[j])**2)
-
-    #       return dist
 
     def _ChannelGain_Calculated(self, sigma_data):
         numerator = self.G_BS_t * self.G_CU_list * (self.lamda ** 2)
@@ -76,32 +67,29 @@ class env_utils():
         Denominator = N_0 * B_k
         Datarate = B_k np.log2(1+Numerator/Denominator)
         """
-        # print(f"Pn: {np.shape(self.p_u)} | H: {np.shape(channelGain_BS_CU)}")
-        # print(f"B: {np.shape(self.B)} | Beta: {np.shape(self.beta)} | sigma: {self.sigma}")
         Numerator = ((channelGain_BS_CU))*self.p_u         # self.P must be a list among all users [1, ... , U]
         Denominator = self.B * self.beta * self.sigma       # self.B must be a list among all users [1, ... , U]
 
         DataRate = self.B * self.beta * np.log2(1+(Numerator/Denominator))
-
-        # print(f"Numerator: {np.shape(Numerator)} | Denominator: {np.shape(Denominator)} | Datarate: {np.shape(DataRate)}")
-        # print(f"======================")
-        # print(f"beta: {self.beta}")
-        # print(f"======================")
-        # print(f"Deno: {self.sigma}"))
-        # print(f"======================"
-        # print(f"Datarate: {DataRate}")
-        # print(f"======================")
         return DataRate
-    # def _calculateArchiveDataRate(self, channelGain_BS_CU):
-    #
-    #     Numerator = ((channelGain_BS_CU))*self.p_u         # self.P must be a list among all users [1, ... , U]
-    #     Denominator = self.B * self.beta * self.sigma       # self.B must be a list among all users [1, ... , U]
-    #
-    #     DataRate = self.B * self.beta * np.log2(1+(Numerator/Denominator))
+
     def _calculateGlobalIteration(self):
+        """
+        :params    : Lipschitz ~ L-smooth
+        :params    : Xi ~ Constants
+        :params    : N_User ~ Number of users
+        :params    : Eta_accuracy ~
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        :variables : epsilon0_accuracy ~ local accuracy of the local users
+        :variables :
+        ==================================================
+        :return: required number of rounds for convergence
+        """
         Numerator = np.log(1/self.epsilon0_accuracy)*2*self.N_User*self.Lipschitz*self.xi
-        Denominator = self.xi*(self.Lipschitz+2)*self.Psi + self.xi*self.Lipschitz/self.N_User - self.eta_accuracy*self.gamma
+        Denominator = self.xi*(self.Lipschitz+2)*self.Psi + \
+                      self.xi*self.Lipschitz/self.N_User - self.eta_accuracy*self.gamma
         return Numerator/Denominator
+
     def _calTimeTrans(self):
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
         return np.divide(self.size, self.DataRate)
