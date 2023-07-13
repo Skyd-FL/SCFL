@@ -31,4 +31,9 @@ elif args.algo == "SAC":
         args,
         env
     )
+else:
+    agent = SAC(
+        args,
+        env
+    )
 agent.train(args)
