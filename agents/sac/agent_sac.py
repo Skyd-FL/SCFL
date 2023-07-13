@@ -17,6 +17,7 @@ class SAC(object):
         # print(f"env shape: {env.observation_space.shape}")
         self.action_space = env.action_space.shape[1]
         # print(f"action shape: {env.action_space.shape}")
+        self.algo_path = args.model_dir
         self.episode_sac = 0
 
         self.gamma = args.gamma
@@ -95,13 +96,16 @@ class SAC(object):
         next_state_batch = torch.FloatTensor(samples["next_obs"]).to(self.device)
         action_batch = torch.FloatTensor(samples["acts"]).to(self.device)
         reward_batch = torch.FloatTensor(samples["rews"].reshape(-1, 1)).to(self.device)
-        mask_batch = torch.FloatTensor(samples["done"].reshape(-1, 1)).to(self.device)
+        done_batch = torch.FloatTensor(samples["done"].reshape(-1, 1)).to(self.device)
+
+        mask_batch = 1-done
+        print(mask_batch)
 
         with torch.no_grad():
             next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
             qf1_next_target, qf2_next_target = self.critic_target(next_state_batch, next_state_action)
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
-            next_q_value = reward_batch + self.gamma * (min_qf_next_target)
+            next_q_value = reward_batch + self.gamma * (min_qf_next_target) * mask_batch
 
         qf1, qf2 = self.critic(state_batch, action_batch)  # Two Q-functions to mitigate positive bias in the policy improvement step
 
@@ -119,7 +123,6 @@ class SAC(object):
         min_qf_pi = torch.min(qf1_pi, qf2_pi)
 
         policy_loss = ((self.alpha * log_pi) - min_qf_pi).mean()
-        # Jπ = 𝔼st∼D,εt∼N[α * logπ(f(εt;st)|st) − Q(st,f(εt;st))]
 
         self.policy_optim.zero_grad()
         policy_loss.backward()
@@ -181,16 +184,22 @@ class SAC(object):
         num_episode = args.max_episode
         max_step = args.max_step
         plotting_interval = args.plot_interval
+        algo_name = str(num_episode) + "-" + str(max_step) + \
+                    "-" + str(args.user_num) + "-" + str(args.pen_coeff) + \
+                    "-" + args.drl_algo + "-" + str(args.batch_size) + \
+                    "-" + args.ai_network
+        """Train the agent."""
+        list_results = []
+        actor_losses = []
+        critic_losses = []
+        scores = []
+        reward_list = []
+        self.total_step = 0
+
         for self.episode_sac in range(1, num_episode+1):
             self.is_test = False
-
             state = self.env.reset()
-            actor_losses = []
-            critic_losses = []
-
-            scores = []
             score = 0
-            reward_list = []
 
             for step in range(1, max_step + 1):
                 self.total_step += 1
@@ -198,13 +207,11 @@ class SAC(object):
                 next_state, reward, done, info = self.step(curr_obs=state, action=action)
                 state = next_state
                 score += reward
-                # print(f"Step :{step} =============== reward:{reward}")
 
                 if done:
                     print(f"Done: Step {step} of episode: {self.episode_sac} have score {score}")
                     state = self.env.reset()
-                    # scores.append(score)
-                    # score = 0
+                    break
 
                 if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
                     actor_loss, critic_loss, policy_loss, ent_loss, alpha = self.update_parameters(self.memory,self.total_step)
@@ -222,10 +229,26 @@ class SAC(object):
                     )
                     pass
                 scores.append(score)
-            print(f"Episode: {self.episode_sac}=================have score {score}")
-
-
-        self.env.close()
+            print(f"Episode: {self.episode_sac}|Round/Eps:{max_step}|"
+                  f"Score {score}|Penalty:{self.env.penalty}|"
+                  f"Energy:{self.env.E}|Iu:{self.env.num_Iu}|"
+                  f"Trans Time:{sum(self.env.t_trans[0]) / len(self.env.t_trans[0])}")
+        if args.save_flag:
+            save_results(
+                scores,
+                actor_losses,
+                critic_losses,
+                reward_list,
+                algo_name
+            )
+        save_item(item_actor=self.actor,
+                  item_critic=self.critic,
+                  item_name=algo_name,
+                  folder_name=self.algo_path)
+        df_results = pd.DataFrame(list_results, columns=['episode', 'score'])
+        result_path = "./results/"
+        file_path = result_path + "{}.csv".format(algo_name)
+        df_results.to_csv(file_path)
 
 
     def _plot(
