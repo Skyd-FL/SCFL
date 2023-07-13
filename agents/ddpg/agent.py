@@ -38,6 +38,7 @@ class DDPGAgent:
         """Initialize."""
         self.obs_dim = env.observation_space.shape[0]
         self.action_dim = env.action_space.shape[1]
+        self.algo_path = args.model_dir
 
         self.memory_size = args.memory_size
         self.batch_size = args.batch_size
@@ -161,25 +162,27 @@ class DDPGAgent:
         num_frames = args.max_step
         plotting_interval = args.plot_interval
         self.total_step = 0
-        algo_name = str(num_ep) + "-" + str(num_frames) + "-" + str(args.user_num) + "-" + str(args.pen_coeff)
+        algo_name = str(num_ep) + "-" + str(num_frames) + \
+                    "-" + str(args.user_num) + "-" + str(args.pen_coeff) + \
+                    "-" + args.drl_algo + "-" + str(args.batch_size) + \
+                    "-" + args.ai_network
         """Train the agent."""
+        list_results = []
+        actor_losses = []
+        critic_losses = []
+        scores = []
+        reward_list = []
+
         for self.episode in range(1, num_ep + 1):
             self.is_test = False
             state = self.env.reset()
-
-            actor_losses = []
-            critic_losses = []
-            scores = []
             score = 0
-            reward_list = []
+
             for step in range(1, num_frames + 1):
                 self.total_step += 1
                 action = self.select_action(state)
                 state_next, reward, done, info = self.step(action)
                 state = state_next
-                # The max_step should be the total communication rounds
-                if self.env.num_Iglob < args.max_step:
-                    num_frames = self.env.num_Iglob
                 score = score + reward
                 # if episode ends
                 if done:
@@ -187,6 +190,8 @@ class DDPGAgent:
                     state = self.env.reset()
                     scores.append(score)
                     score = 0
+                    break
+
                 # if training is ready
                 if (
                         len(self.memory) >= self.batch_size
@@ -207,7 +212,10 @@ class DDPGAgent:
                     )
                     pass
                 scores.append(score)
-            print(f"Episode: {self.episode} ================= have score {score}")
+            print(f"Episode: {self.episode}|Round/Eps:{num_frames}|"
+                  f"Score {score}|Penalty:{self.env.penalty}|"
+                  f"Energy:{self.env.E}|Iu:{self.env.num_Iu}|"
+                  f"Trans Time:{sum(self.env.t_trans[0]) / len(self.env.t_trans[0])}")
         if args.save_flag:
             save_results(
                 scores,
