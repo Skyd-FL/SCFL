@@ -12,7 +12,7 @@ class env_agent_utils():
 
     def _wrapState(self):
         self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
-        state = np.array(self.ChannelGain)
+        state = np.array(self.ChannelGain).reshape(1,-1)
         return state
 
     def _decomposeState(self, state):
@@ -42,13 +42,7 @@ class env_agent_utils():
         tau  = 0
 
         return [
-            np.array(beta).reshape((1,self.N_User)),
-            np.array(f_u).reshape((1,self.N_User)),
-            np.array(p_u).reshape((1,self.N_User))
+            np.array(beta).reshape((1,self.N_User)).squeeze(),
+            np.array(f_u).reshape((1,self.N_User)).squeeze(),
+            np.array(p_u).reshape((1,self.N_User)).squeeze()
         ]
-
-        # return [
-        #         np.array(beta).reshape(1, self.N_User).squeeze(),
-        #         np.array(o).reshape(1, self.N_User).squeeze(),
-        #         np.array(P_n).reshape(1, self.N_User).squeeze()
-        #        ]
