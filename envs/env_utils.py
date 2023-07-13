@@ -95,7 +95,7 @@ class env_utils():
 
     def _calTimeTrans(self):
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
-        return np.divide(self.size, self.DataRate)
+        return np.divide(self.data_size, self.DataRate)
 
     def _Energy(self):
         """
