@@ -114,9 +114,11 @@ class SCFL_env(env_utils, env_agent_utils):
 
         # Penalty 1:
         penalty += max(np.sum(((self.Au/self.f_u+self.t_trans)-self.Time_max)),0)
-        reward = - self.E + self.pen_coeff*penalty1
+        self.penalty = penalty
+        reward = - self.E + self.pen_coeff*penalty
 
-        if step == self.max_step:
+        # Stop at Maximum Glob round
+        if (step == self.max_step) & (step == self.num_Iglob):
             done = True
         else:
             done = False
