@@ -13,10 +13,13 @@ def get_arguments():
                         help="number of runs")
 
     # --------------------- Path
+    # --------------------- Path
     parser.add_argument("--data-dir", type=Path, default="D:/Datasets/",
                         help="Path to the mnist dataset")
-    parser.add_argument("--exp-dir", type=Path, default="D:/Github/1-RepresentationLearning/IVAE/experiments",
+    parser.add_argument("--model-dir", type=Path, default="./results/models/",
                         help="Path to the experiment folder, where all logs/checkpoints will be stored")
+    parser.add_argument("--result-path", type=Path, default="./results/exp_evals/results.pkl",
+                        help="Path to the experimental evaluation results")
 
     """ ======================================================== """
     """ ====================== Flag & name ===================== """
