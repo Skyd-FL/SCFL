@@ -91,6 +91,10 @@ class env_utils():
         return Numerator/Denominator
 
     def _calculateLocalIteration(self):
+        # print(f"L-smooth: {self.Lipschitz}|"
+        #       f"Strongly Convex: {self.gamma}|"
+        #       f"Step size: {self.delta}|"
+        #       f"Target Accuracy: {self.eta_accuracy}")
         return 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma) * np.log2(1 / self.eta_accuracy)
 
     def _calTimeTrans(self):
