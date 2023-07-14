@@ -110,7 +110,7 @@ def get_arguments():
                                 term against the reward (default: 0.2)')
     parser.add_argument('--automatic_entropy_tuning', type=bool, default=False,
                         metavar='G',
-                        help='Automaically adjust α (default: False)')
+                        help='Automatically adjust α (default: False)')
     parser.add_argument("--lr-actor", type=float, default=3e-4,
                         help="learning rate for actor")
     parser.add_argument("--lr-critic", type=float, default=1e-3,
