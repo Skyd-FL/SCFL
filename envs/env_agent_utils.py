@@ -7,12 +7,12 @@ class env_agent_utils():
     def __init__(self):
         pass
 
-    def _round(self,input, unit):
+    def _round(self, input, unit):
         return np.round(input / unit) * unit
 
     def _wrapState(self):
-        self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
-        state = np.array(self.ChannelGain).reshape(1,-1)
+        self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)
+        state = np.array(self.ChannelGain).reshape(1, -1)
         return state
 
     def _decomposeState(self, state):
@@ -37,12 +37,12 @@ class env_agent_utils():
         beta = scipy.special.softmax(beta, axis=None)
 
         f_u = action[0][self.N_User: 2 * self.N_User].astype(float)
-        p_u = (action[0][2 * self.N_User: 3 * self.N_User].astype(float))*self.p_u_max
+        p_u = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
         butt = 0
-        tau  = 0
+        tau = 0
 
         return [
-            np.array(beta).reshape((1,self.N_User)).squeeze(),
-            np.array(f_u).reshape((1,self.N_User)).squeeze(),
-            np.array(p_u).reshape((1,self.N_User)).squeeze()
+            np.array(beta).reshape((1, self.N_User)).squeeze(),
+            np.array(f_u).reshape((1, self.N_User)).squeeze(),
+            np.array(p_u).reshape((1, self.N_User)).squeeze()
         ]
