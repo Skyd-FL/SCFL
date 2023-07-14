@@ -40,20 +40,24 @@ class SCFL_env(env_utils, env_agent_utils):
         self.high_freq = args.high_freq
         self.C_u = np.random.uniform(low=self.low_freq, high=self.high_freq, size=self.N_User)
         self.D_u = 500
-        self.gamma = args.L * (1 - uniform_generator(mean=0, std=0.1))
-        self.Lipschitz = args.L
+
         self.pen_coeff = args.pen_coeff  # coefficient of penalty defined by lamba in paper
         self.data_size = args.data_size
         self.kappa = 10 ^ -28
         self.f_u_max = args.f_u_max
         self.B = args.Bandwidth
-        self.eta_accuracy = args.eta_accuracy  # target local accuracy
-        self.epsilon0_accuracy = args.epsilon0_accuracy  # target global accuracy
-        self.delta = (2 / args.L) * (1 - uniform_generator(mean=0.2, std=0.2))
+
         self.xi = 0.1
         self.coeff = 1
         self.Time_max = args.tmax  # max time per round
         self.lastSample_time = 0.1
+
+        # AI Model/Dataset Coefficient
+        self.gamma = args.L * (1 - uniform_generator(mean=0, std=0.1))
+        self.Lipschitz = args.L
+        self.delta = (2 / args.L) * (1 - uniform_generator(mean=0.2, std=0.2))
+        self.eta_accuracy = args.eta_accuracy  # target local accuracy
+        self.epsilon0_accuracy = args.epsilon0_accuracy  # target global accuracy
 
         """ Generalization Gap Calculation """
         self.dataset = "mnist"  # Choose the dataset to get the entropy value , option ["mnist","cifar10"]
