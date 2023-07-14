@@ -1,18 +1,12 @@
 import numpy as np
 from utils.setting_setup import *
 import scipy
+import math
+
 
 class env_utils():
     def __init__(self):
         pass
-
-
-    def _channelGain_BS_CU(self):
-        """     Free-space path loss    """
-        numerator = self.G_BS_t * self.G_CU_list * (self.lamda ** 2)  # Directivity_BS * Directivity_CU * lambda
-        denominator = ((4 * np.pi) ** 3) * (self.distance_CU_BS ** 4)
-        channelGain = numerator / denominator
-        return channelGain
 
     def _location_BS_Generator(self):
         BS_location = [self.BS_x, self.BS_y]
@@ -48,18 +42,26 @@ class env_utils():
     def _distance_Calculated(self, A, B):
         return np.array([np.sqrt(np.sum((A - B) ** 2, axis=1))]).transpose()
 
-    def _ChannelGain_Calculated(self, sigma_data):
-        print(f"DataRate: {self.G_BS_t}|"
-              f"P_u: {self.G_CU_list}|"
-              f"Channel: {self.lamda}|"
-              f"AWGN: {awgn_coeff}|"
-              f"Nume: {numerator}|"
-              f"Deno: {denominator}")
-        numerator = self.G_BS_t * self.G_CU_list * (self.lamda ** 2)
-        denominator = (4 * np.pi * self.distance_CU_BS) ** 2
+    # def _ChannelGain_Calculated(self, sigma_data):
+    #     print(f"DataRate: {self.G_BS_t}|"
+    #           f"P_u: {self.G_CU_list}|"
+    #           f"Channel: {self.lamda}|"
+    #           f"AWGN: {awgn_coeff}|"
+    #           f"Nume: {numerator}|"
+    #           f"Deno: {denominator}")
+    #     numerator = self.G_BS_t * self.G_CU_list * (self.lamda ** 2)
+    #     denominator = (4 * np.pi * self.distance_CU_BS) ** 2
+    #     awgn_coeff = np.random.normal(1, sigma_data)
+    #     ChannelGain = (numerator * awgn_coeff) / denominator
+    #     # print(ChannelGain)
+    #     return np.array(ChannelGain)
+
+    def _ChannelGain_Calculate(self, sigma_data):
+        speed_of_light = 3 * 10 ** 8  # Speed of light in meters per second
+        pi = math.pi
         awgn_coeff = np.random.normal(1, sigma_data)
-        ChannelGain = (numerator*awgn_coeff) / denominator
-        # print(ChannelGain)
+        ChannelGain = (speed_of_light * awgn_coeff / (4 * pi * self.freq_carrier * self.distance_CU_BS)) ** 0.5
+
         return np.array(ChannelGain)
 
     def _calculateDataRate(self, channelGain_BS_CU):
@@ -73,10 +75,10 @@ class env_utils():
         Denominator = N_0 * B_k
         Datarate = B_k np.log2(1+Numerator/Denominator)
         """
-        Numerator = channelGain_BS_CU * self.p_u         # self.P must be a list among all users [1, ... , U]
-        Denominator = self.B * self.beta * self.sigma       # self.B must be a list among all users [1, ... , U]
+        Numerator = channelGain_BS_CU * self.p_u  # self.P must be a list among all users [1, ... , U]
+        Denominator = self.B * self.beta * self.sigma  # self.B must be a list among all users [1, ... , U]
 
-        DataRate = self.B * self.beta * np.log2(1+(Numerator/Denominator))
+        DataRate = self.B * self.beta * np.log2(1 + (Numerator / Denominator))
         # print(f"DataRate: {DataRate}|"
         #       f"P_u: {self.p_u}|"
         #       f"Channel: {channelGain_BS_CU}|"
@@ -97,10 +99,10 @@ class env_utils():
         ==================================================
         :return: required number of rounds for convergence
         """
-        Numerator = np.log(1/self.epsilon0_accuracy)*2*self.N_User*self.Lipschitz*self.xi
-        Denominator = self.xi*(self.Lipschitz+2)*self.Psi + \
-                      self.xi*self.Lipschitz/self.N_User - self.eta_accuracy*self.gamma
-        return Numerator/Denominator
+        Numerator = np.log(1 / self.epsilon0_accuracy) * 2 * self.N_User * self.Lipschitz * self.xi
+        Denominator = self.xi * (self.Lipschitz + 2) * self.Psi + \
+                      self.xi * self.Lipschitz / self.N_User - self.eta_accuracy * self.gamma
+        return Numerator / Denominator
 
     def _calculateLocalIteration(self):
         # print(f"L-smooth: {self.Lipschitz}|"
@@ -120,11 +122,11 @@ class env_utils():
         :return:
         """
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
-        #Calculate computation energy
-        self.num_Iu = 2/((2-self.Lipschitz*self.delta) * self.delta * self.gamma) * np.log2(1/self.eta_accuracy)
-        self.EC_u = self.num_Iu * self.kappa * self.C_u * self.D_u * self.f_u**2
+        # Calculate computation energy
+        self.num_Iu = 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma) * np.log2(1 / self.eta_accuracy)
+        self.EC_u = self.num_Iu * self.kappa * self.C_u * self.D_u * self.f_u ** 2
         # Calculate transmission energy
         self.t_trans = self._calTimeTrans()
-        self.ET_u = np.multiply(self.p_u,self.t_trans)
+        self.ET_u = np.multiply(self.p_u, self.t_trans)
 
-        return np.sum(self.EC_u)+np.sum(self.ET_u)
+        return np.sum(self.EC_u) + np.sum(self.ET_u)
