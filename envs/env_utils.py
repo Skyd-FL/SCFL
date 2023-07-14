@@ -49,6 +49,12 @@ class env_utils():
         return np.array([np.sqrt(np.sum((A - B) ** 2, axis=1))]).transpose()
 
     def _ChannelGain_Calculated(self, sigma_data):
+        print(f"DataRate: {self.G_BS_t}|"
+              f"P_u: {self.G_CU_list}|"
+              f"Channel: {self.lamda}|"
+              f"AWGN: {awgn_coeff}|"
+              f"Nume: {numerator}|"
+              f"Deno: {denominator}")
         numerator = self.G_BS_t * self.G_CU_list * (self.lamda ** 2)
         denominator = (4 * np.pi * self.distance_CU_BS) ** 2
         awgn_coeff = np.random.normal(1, sigma_data)
@@ -67,10 +73,16 @@ class env_utils():
         Denominator = N_0 * B_k
         Datarate = B_k np.log2(1+Numerator/Denominator)
         """
-        Numerator = ((channelGain_BS_CU))*self.p_u         # self.P must be a list among all users [1, ... , U]
+        Numerator = channelGain_BS_CU * self.p_u         # self.P must be a list among all users [1, ... , U]
         Denominator = self.B * self.beta * self.sigma       # self.B must be a list among all users [1, ... , U]
 
         DataRate = self.B * self.beta * np.log2(1+(Numerator/Denominator))
+        # print(f"DataRate: {DataRate}|"
+        #       f"P_u: {self.p_u}|"
+        #       f"Channel: {channelGain_BS_CU}|"
+        #       f"Bandwidth: {self.B}|"
+        #       f"Allocation: {self.beta}|"
+        #       f"Noise: {self.sigma}")
         return DataRate
 
     def _calculateGlobalIteration(self):
@@ -99,6 +111,7 @@ class env_utils():
 
     def _calTimeTrans(self):
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
+        print(self.data_size)
         return np.divide(self.data_size, self.DataRate)
 
     def _Energy(self):
