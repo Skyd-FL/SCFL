@@ -15,6 +15,7 @@ class SCFL_env(env_utils, env_agent_utils):
         # Network setting
         self.noise = args.noise
         self.lamda = convert_mhz_to_m(args.freq_carrier)
+        self.freq_carrier = args.freq_carrier
         self.N_User = args.user_num
         self.G_CU_list = np.ones((self.N_User, 1))  # User directivity
         self.G_BS_t = 1  # BS directivity
@@ -44,12 +45,12 @@ class SCFL_env(env_utils, env_agent_utils):
 
         self.pen_coeff = args.pen_coeff  # coefficient of penalty defined by lamba in paper
         self.data_size = args.data_size
+        # effective switched capacitance that depends on the chip architecture
         self.kappa = 10 ^ -28
         self.f_u_max = args.f_u_max
         self.B = args.Bandwidth
 
         self.xi = 0.1
-        self.coeff = 1
         self.Time_max = args.tmax  # max time per round
         self.lastSample_time = 0.1
 
@@ -91,7 +92,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.User_trajectory = self._trajectory_U_Generator()
         self.distance_CU_BS = self._distance_Calculated(self.U_location, self.BS_location)
 
-        self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
+        self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)
         self.commonDataRate = self._calculateDataRate(self.ChannelGain)
         self.E = 0  # initialize rewards)
 
@@ -110,7 +111,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.U_location = self.User_trajectory + self.U_location
         state_next = self._wrapState()  # State wrap
 
-        self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)  # Re-calculate channel gain
+        self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)  # Re-calculate channel gain
         self.E = self._Energy()  # Energy
         self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
         self.num_Iu = self._calculateLocalIteration()  # Local Iterations
@@ -139,7 +140,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.distance_CU_BS = self._distance_Calculated(self.BS_location, self.U_location)
 
         # re-calculate channel gain
-        self.ChannelGain = self._ChannelGain_Calculated(self.sigma_data)
+        self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)
         state_next = self._wrapState()
         return state_next
 
