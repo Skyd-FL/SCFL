@@ -100,7 +100,7 @@ class SAC(object):
         done_batch = torch.FloatTensor(samples["done"].reshape(-1, 1)).to(self.device)
 
         mask_batch = 1 - done_batch
-        print(mask_batch)
+        # print(mask_batch)
 
         with torch.no_grad():
             next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
@@ -233,8 +233,9 @@ class SAC(object):
                 scores.append(score)
             print(f"Episode: {self.episode_sac}|Round/Eps:{max_step}|"
                   f"Score {score}|Penalty:{self.env.penalty}|"
+                  f"Trans Time:{sum(self.env.t_trans[0]) / len(self.env.t_trans[0])}|"
                   f"Energy:{self.env.E}|Iu:{self.env.num_Iu}|"
-                  f"Trans Time:{sum(self.env.t_trans[0]) / len(self.env.t_trans[0])}")
+                  f"Global Round: {self.env.num_Iglob}")
         if args.save_flag:
             save_results(
                 scores,
