@@ -10,7 +10,6 @@ from typing import Dict, List, Tuple
 from utils.result_utils import *
 
 
-
 class SAC(object):
     def __init__(self, args, env):
         self.num_inputs = env.observation_space.shape[0]
@@ -55,13 +54,15 @@ class SAC(object):
                 self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
                 self.alpha_optim = Adam([self.log_alpha], lr=args.lr_actor)
 
-            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size, self.action_space).to(self.device)
+            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size, self.action_space).to(
+                self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr_actor)
 
         else:
             self.alpha = 0
             self.automatic_entropy_tuning = False
-            self.policy = DeterministicPolicy(self.num_inputs, self.action_space, args.hidden_size, self.action_space).to(self.device)
+            self.policy = DeterministicPolicy(self.num_inputs, self.action_space, args.hidden_size,
+                                              self.action_space).to(self.device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr_actor)
 
     def select_action(self, state, evaluate=False):
@@ -73,7 +74,7 @@ class SAC(object):
         return action.detach().cpu().numpy()[0]
 
     def step(self, curr_obs: np.ndarray, action: np.ndarray) -> Tuple[np.ndarray, np.float64]:
-    # def step(self, curr_obs: np.ndarray, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool]:
+        # def step(self, curr_obs: np.ndarray, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool]:
         """Take an action and return the response of the env."""
         state_next, reward, done, info = self.env.step(action, self.total_step)
         # print(f"reward: {reward}")
@@ -98,7 +99,7 @@ class SAC(object):
         reward_batch = torch.FloatTensor(samples["rews"].reshape(-1, 1)).to(self.device)
         done_batch = torch.FloatTensor(samples["done"].reshape(-1, 1)).to(self.device)
 
-        mask_batch = 1-done
+        mask_batch = 1 - done_batch
         print(mask_batch)
 
         with torch.no_grad():
@@ -107,7 +108,8 @@ class SAC(object):
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
             next_q_value = reward_batch + self.gamma * (min_qf_next_target) * mask_batch
 
-        qf1, qf2 = self.critic(state_batch, action_batch)  # Two Q-functions to mitigate positive bias in the policy improvement step
+        qf1, qf2 = self.critic(state_batch,
+                               action_batch)  # Two Q-functions to mitigate positive bias in the policy improvement step
 
         qf1_loss = F.mse_loss(qf1, next_q_value)  # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
         qf2_loss = F.mse_loss(qf2, next_q_value)  # JQ = 𝔼(st,at)~D[0.5(Q1(st,at) - r(st,at) - γ(𝔼st+1~p[V(st+1)]))^2]
@@ -136,11 +138,10 @@ class SAC(object):
             self.alpha_optim.step()
 
             self.alpha = self.log_alpha.exp()
-            alpha_tlogs = self.alpha.clone() # For TensorboardX logs
+            alpha_tlogs = self.alpha.clone()  # For TensorboardX logs
         else:
             alpha_loss = torch.tensor(0.).to(self.device)
-            alpha_tlogs = torch.tensor(self.alpha) # For TensorboardX logs
-
+            alpha_tlogs = torch.tensor(self.alpha)  # For TensorboardX logs
 
         if updates % self.target_update_interval == 0:
             soft_update(self.critic_target, self.critic, self.tau)
@@ -196,7 +197,7 @@ class SAC(object):
         reward_list = []
         self.total_step = 0
 
-        for self.episode_sac in range(1, num_episode+1):
+        for self.episode_sac in range(1, num_episode + 1):
             self.is_test = False
             state = self.env.reset()
             score = 0
@@ -214,7 +215,8 @@ class SAC(object):
                     break
 
                 if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
-                    actor_loss, critic_loss, policy_loss, ent_loss, alpha = self.update_parameters(self.memory,self.total_step)
+                    actor_loss, critic_loss, policy_loss, ent_loss, alpha = self.update_parameters(self.memory,
+                                                                                                   self.total_step)
                     # actor_losses.append(actor_loss.cpu())
                     # critic_losses.append(critic_loss.cpu())
                     actor_losses.append(actor_loss)
@@ -250,7 +252,6 @@ class SAC(object):
         file_path = result_path + "{}.csv".format(algo_name)
         df_results.to_csv(file_path)
 
-
     def _plot(
             self,
             frame_idx: int,
@@ -276,10 +277,3 @@ class SAC(object):
             subplot(loc, title, values)
         plt.savefig(fname="result.pdf")
         plt.show()
-
-
-
-
-
-
-

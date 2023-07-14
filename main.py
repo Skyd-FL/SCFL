@@ -1,6 +1,5 @@
 import argparse
 import datetime
-import gym
 import numpy as np
 import itertools
 import torch
@@ -14,8 +13,6 @@ from envs.env_utils import *
 from envs.env_agent_utils import *
 from utils.setting_setup import *
 from utils.result_utils import *
-
-
 
 args = get_arguments()
 
