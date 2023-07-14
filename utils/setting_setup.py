@@ -53,8 +53,8 @@ def get_arguments():
                         help="network noise")
     parser.add_argument("--user-num", type=int, default=10,
                         help="number of users")
-    parser.add_argument("--lamda", type=float, default=0.001,
-                        help="signal wave length")
+    parser.add_argument("--freq-carrier", type=float, default=2500,
+                        help="signal carrier frequency (MHz)")
     parser.add_argument("--poweru-max", type=float, default=10,
                         help="max power of user threshold")
     parser.add_argument("--bandwidth", type=float, default=20e6,
