@@ -6,6 +6,7 @@ import scipy
 from dataset_est.get_entropy import *
 from envs.env_utils import *
 from envs.env_agent_utils import *
+from envs.commcal_utils import *
 from utils.func_utils import *
 
 
@@ -13,7 +14,7 @@ class SCFL_env(env_utils, env_agent_utils):
     def __init__(self, args):
         # Network setting
         self.noise = args.noise
-        self.lamda = args.lamda
+        self.lamda = convert_mhz_to_m(args.freq_carrier)
         self.N_User = args.user_num
         self.G_CU_list = np.ones((self.N_User, 1))  # User directivity
         self.G_BS_t = 1  # BS directivity
