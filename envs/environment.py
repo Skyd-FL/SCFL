@@ -15,7 +15,7 @@ class SCFL_env(env_utils, env_agent_utils):
         # Network setting
         self.noise = args.noise
         self.lamda = convert_mhz_to_m(args.freq_carrier)
-        self.freq_carrier = args.freq_carrier
+        self.freq_carrier = args.freq_carrier * (10**6)
         self.N_User = args.user_num
         self.G_CU_list = np.ones((self.N_User, 1))  # User directivity
         self.G_BS_t = 1  # BS directivity
