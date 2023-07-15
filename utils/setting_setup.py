@@ -32,8 +32,6 @@ def get_arguments():
                         help="Evaluation Trigger")
     parser.add_argument("--log-flag", type=bool, default=False,
                         help="Logging Trigger")
-    parser.add_argument("--f-cluster", type=bool, default=True,
-                        help="Trigger the clustering to get salient feature of specific categories")
     parser.add_argument("--plot-interval", type=int, default=500000000,
                         help="Number of step needed to plot new accuracy plot")
     parser.add_argument("--save-flag", type=bool, default=True,
