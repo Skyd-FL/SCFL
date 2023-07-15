@@ -67,8 +67,6 @@ class env_utils():
         Denominator = self.B * self.beta * self.sigma + mini_eps # self.B must be a list among all users [1, ... , U]
 
         DataRate = self.B * self.beta * np.log2(1 + (Numerator / Denominator))
-        # print(f"DataRate: {DataRate}|"
-        #       f"Channel: {channelGain_BS_CU}|")
         return DataRate
 
     def _calculateGlobalIteration(self):
@@ -89,10 +87,6 @@ class env_utils():
         return Numerator / Denominator
 
     def _calculateLocalIteration(self):
-        # print(f"L-smooth: {self.Lipschitz}|"
-        #       f"Strongly Convex: {self.gamma}|"
-        #       f"Step size: {self.delta}|"
-        #       f"Target Accuracy: {self.eta_accuracy}")
         return 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma) * np.log2(1 / self.eta_accuracy)
 
     def _calTimeTrans(self):
@@ -112,6 +106,4 @@ class env_utils():
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u, self.t_trans)
 
-        print(f"kappa: {self.kappa}, C_u: {self.C_u}, D_u: {self.D_u}, f_u: {self.f_u} ||| EC_u: {self.EC_u}, ET_u: {self.ET_u}")
-
-        return (np.sum(self.EC_u) + np.sum(self.ET_u))/1000
+        return np.sum(self.EC_u) + np.sum(self.ET_u)
