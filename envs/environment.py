@@ -46,7 +46,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.pen_coeff = args.pen_coeff  # coefficient of penalty defined by lamba in paper
         self.data_size = args.data_size
         # effective switched capacitance that depends on the chip architecture
-        self.kappa = 10 ^ -28
+        self.kappa = 10**(-28)
         self.f_u_max = args.f_u_max
         self.B = args.Bandwidth
 
