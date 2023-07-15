@@ -64,10 +64,10 @@ class SCFL_env(env_utils, env_agent_utils):
         """ Generalization Gap Calculation """
         self.dataset = "mnist"  # Choose the dataset to get the entropy value , option ["mnist","cifar10"]
         if self.dataset == "mnist":
-            self.entropyH = entropy_holder.get_value("mnist_data")
+            self.entropyH = 3.3 # entropy_holder.get_value("mnist_data")
             print("Value entropy of MNIST dataset: ", self.entropyH)
         elif self.dataset == "cifar10":
-            self.entropyH = entropy_holder.get_value("cifar10_dataset")
+            self.entropyH = 3.3 # entropy_holder.get_value("cifar10_dataset")
             print("Value entropy of CIFAR10 dataset", self.entropyH)
         else:
             print("Invalid key")
