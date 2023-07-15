@@ -112,4 +112,6 @@ class env_utils():
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u, self.t_trans)
 
+        print(f"kappa: {self.kappa}, C_u: {self.C_u}, D_u: {self.D_u}, f_u: {self.f_u} ||| EC_u: {self.EC_u}, ET_u: {self.ET_u}")
+
         return (np.sum(self.EC_u) + np.sum(self.ET_u))/1000
