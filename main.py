@@ -13,8 +13,14 @@ from envs.env_utils import *
 from envs.env_agent_utils import *
 from utils.setting_setup import *
 from utils.result_utils import *
+from beautifultable import BeautifulTable
+
 
 args = get_arguments()
+
+table = BeautifulTable(maxwidth=140, detect_numerics=False)
+table.rows.append(["AI Network", args.ai_network, "Algorithm", args.algo, "Plot Interval", args.plot_interval])
+print(table)
 
 env = SCFL_env(args)
 
@@ -33,4 +39,4 @@ else:
         args,
         env
     )
-agent.train(args)
+# agent.train(args)
