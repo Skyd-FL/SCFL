@@ -131,9 +131,7 @@ def get_arguments():
                         help='max number of CPU cycles needed to compute one sample data (default: 30000)')
     parser.add_argument('--data-size', type=float, default=28.1*1024, metavar='size',
                         help='Data size of user to transmit [bit] (default: 30000)')
-    parser.add_argument('--Bandwidth', type=float, default=20e6, metavar='system_bandwidth',
-                        help='Bandwidth of system [Hz] (default: 20e6)')
-    parser.add_argument('--f_u_max', type=float, default=2e9, metavar='computation_capacity_max',
+    parser.add_argument('--f-u-max', type=float, default=2e9, metavar='computation_capacity_max',
                         help='Computation capacity of user [Hz] (default: 20e6)')
     parser.add_argument('--eta_accuracy', type=float, default=0.01, metavar='local_accuracy',
                         help='Local accuracy of system (default: 0.01)')
