@@ -87,7 +87,9 @@ class env_utils():
         return Numerator / Denominator
 
     def _calculateLocalIteration(self):
-        return 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma) * np.log2(1 / self.eta_accuracy)
+        v = 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma)
+        w = np.log2(1 / self.eta_accuracy)
+        return v, v*w
 
     def _calTimeTrans(self):
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
@@ -105,5 +107,8 @@ class env_utils():
         # Calculate transmission energy
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u, self.t_trans)
+
+        # print(f"EC_u: {self.EC_u} = {np.sum(self.EC_u)}| ET_u: {self.ET_u} = {np.sum(self.ET_u)} | "
+        #       f"P_u: {self.p_u}| T: {self.t_trans}")
 
         return np.sum(self.EC_u) + np.sum(self.ET_u)
