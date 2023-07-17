@@ -54,27 +54,26 @@ class SAC(object):
                 self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
                 self.alpha_optim = Adam([self.log_alpha], lr=args.lr_actor)
 
-            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size, self.action_space).to(
+            self.actor = GaussianPolicy(self.num_inputs, self.action_space, args.hidden_size, self.action_space).to(
                 self.device)
-            self.policy_optim = Adam(self.policy.parameters(), lr=args.lr_actor)
+            self.actor_optim = Adam(self.actor.parameters(), lr=args.lr_actor)
 
         else:
             self.alpha = 0
             self.automatic_entropy_tuning = False
-            self.policy = DeterministicPolicy(self.num_inputs, self.action_space, args.hidden_size,
+            self.actor = DeterministicPolicy(self.num_inputs, self.action_space, args.hidden_size,
                                               self.action_space).to(self.device)
-            self.policy_optim = Adam(self.policy.parameters(), lr=args.lr_actor)
+            self.actor_optim = Adam(self.actor.parameters(), lr=args.lr_actor)
 
     def select_action(self, state, evaluate=False):
         state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
         if evaluate is False:
-            action, _, _ = self.policy.sample(state)
+            action, _, _ = self.actor.sample(state)
         else:
-            _, _, action = self.policy.sample(state)
+            _, _, action = self.actor.sample(state)
         return action.detach().cpu().numpy()[0]
 
-    def step(self, curr_obs: np.ndarray, action: np.ndarray) -> Tuple[np.ndarray, np.float64]:
-        # def step(self, curr_obs: np.ndarray, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool]:
+    def step(self, curr_obs: np.ndarray, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool, bool]:
         """Take an action and return the response of the env."""
         state_next, reward, done, info = self.env.step(action, self.total_step)
         # print(f"reward: {reward}")
@@ -103,7 +102,7 @@ class SAC(object):
         # print(mask_batch)
 
         with torch.no_grad():
-            next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
+            next_state_action, next_state_log_pi, _ = self.actor.sample(next_state_batch)
             qf1_next_target, qf2_next_target = self.critic_target(next_state_batch, next_state_action)
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
             next_q_value = reward_batch + self.gamma * (min_qf_next_target) * mask_batch
@@ -119,16 +118,16 @@ class SAC(object):
         qf_loss.backward()
         self.critic_optim.step()
 
-        pi, log_pi, _ = self.policy.sample(state_batch)
+        pi, log_pi, _ = self.actor.sample(state_batch)
 
         qf1_pi, qf2_pi = self.critic(state_batch, pi)
         min_qf_pi = torch.min(qf1_pi, qf2_pi)
 
         policy_loss = ((self.alpha * log_pi) - min_qf_pi).mean()
 
-        self.policy_optim.zero_grad()
+        self.actor_optim.zero_grad()
         policy_loss.backward()
-        self.policy_optim.step()
+        self.actor_optim.step()
 
         if self.automatic_entropy_tuning:
             alpha_loss = -(self.log_alpha * (log_pi + self.target_entropy).detach()).mean()
@@ -155,29 +154,29 @@ class SAC(object):
         if ckpt_path is None:
             ckpt_path = "checkpoints/sac_checkpoint_{}_{}".format(env_name, suffix)
         print('Saving models to {}'.format(ckpt_path))
-        torch.save({'policy_state_dict': self.policy.state_dict(),
+        torch.save({'policy_state_dict': self.actor.state_dict(),
                     'critic_state_dict': self.critic.state_dict(),
                     'critic_target_state_dict': self.critic_target.state_dict(),
                     'critic_optimizer_state_dict': self.critic_optim.state_dict(),
-                    'policy_optimizer_state_dict': self.policy_optim.state_dict()}, ckpt_path)
+                    'policy_optimizer_state_dict': self.actor_optim.state_dict()}, ckpt_path)
 
     # Load model parameters
     def load_checkpoint(self, ckpt_path, evaluate=False):
         print('Loading models from {}'.format(ckpt_path))
         if ckpt_path is not None:
             checkpoint = torch.load(ckpt_path)
-            self.policy.load_state_dict(checkpoint['policy_state_dict'])
+            self.actor.load_state_dict(checkpoint['policy_state_dict'])
             self.critic.load_state_dict(checkpoint['critic_state_dict'])
             self.critic_target.load_state_dict(checkpoint['critic_target_state_dict'])
             self.critic_optim.load_state_dict(checkpoint['critic_optimizer_state_dict'])
-            self.policy_optim.load_state_dict(checkpoint['policy_optimizer_state_dict'])
+            self.actor_optim.load_state_dict(checkpoint['policy_optimizer_state_dict'])
 
             if evaluate:
-                self.policy.eval()
+                self.actor.eval()
                 self.critic.eval()
                 self.critic_target.eval()
             else:
-                self.policy.train()
+                self.actor.train()
                 self.critic.train()
                 self.critic_target.train()
 
@@ -217,8 +216,7 @@ class SAC(object):
                 if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
                     actor_loss, critic_loss, policy_loss, ent_loss, alpha = self.update_parameters(self.memory,
                                                                                                    self.total_step)
-                    # actor_losses.append(actor_loss.cpu())
-                    # critic_losses.append(critic_loss.cpu())
+
                     actor_losses.append(actor_loss)
                     critic_losses.append(critic_loss)
                     reward_list.append(reward)
