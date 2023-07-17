@@ -48,7 +48,6 @@ class SCFL_env(env_utils, env_agent_utils):
         # effective switched capacitance that depends on the chip architecture
         self.kappa = 10**(-28)
         self.f_u_max = args.f_u_max
-        self.B = args.Bandwidth
 
         self.xi = 0.1
         self.Time_max = args.tmax  # max time per round
@@ -116,8 +115,11 @@ class SCFL_env(env_utils, env_agent_utils):
         self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
         self.factor_Iu, self.num_Iu = self._calculateLocalIteration()  # Local Iterations
         self.t_trans = self._calTimeTrans()  # Transmission Time
-        self.Au = self.num_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
-
+        self.Au = self.factor_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
+        print(f"==========================================")
+        print(f"Au: {self.Au}| factor_Iu: {self.factor_Iu}| "
+              f"num_Iu: {self.num_Iu}| C_u: {self.C_u}|"
+              f"D_u: {self.D_u}| f_u: {self.f_u}")
         # Penalty 1:
         penalty += max(np.sum(((self.Au / self.f_u + self.t_trans) - self.Time_max)), 0)
         self.penalty = penalty
