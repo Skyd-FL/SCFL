@@ -43,4 +43,4 @@ else:
         args,
         env
     )
-# agent.train(args)
+agent.train(args)
