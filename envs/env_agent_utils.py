@@ -24,7 +24,10 @@ class env_agent_utils():
     def _wrapAction(self):
         action = np.concatenate((np.array([[self.beta]]).reshape(1, self.N_User),
                                  np.array([[self.f_u]]).reshape(1, self.N_User),
-                                 np.array([[self.p_u]]).reshape(1, self.N_User)), axis=1)
+                                 np.array([[self.p_u]]).reshape(1, self.N_User),
+                                 np.array([[self.butt]]).reshape(1, 1),
+                                 np.array([[self.tau]]).reshape(1, 1),
+                                 ), axis=1)
         return action
 
     def _decomposeAction(self, action):
@@ -36,10 +39,10 @@ class env_agent_utils():
         beta = action[0][0: self.N_User].astype(float)
         beta = scipy.special.softmax(beta, axis=None)
 
-        f_u = action[0][self.N_User: 2 * self.N_User].astype(float)
+        f_u = action[0][self.N_User: 2 * self.N_User].astype(float) * self.f_u_max
         p_u = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
-        butt = 0
-        tau = 0
+        butt = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
+        tau = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
 
         return [
             np.array(beta).reshape((1, self.N_User)).squeeze(),
