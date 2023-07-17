@@ -114,7 +114,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)  # Re-calculate channel gain
         self.E = self._Energy()  # Energy
         self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
-        self.num_Iu = self._calculateLocalIteration()  # Local Iterations
+        self.factor_Iu, self.num_Iu = self._calculateLocalIteration()  # Local Iterations
         self.t_trans = self._calTimeTrans()  # Transmission Time
         self.Au = self.num_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
 
@@ -122,6 +122,8 @@ class SCFL_env(env_utils, env_agent_utils):
         penalty += max(np.sum(((self.Au / self.f_u + self.t_trans) - self.Time_max)), 0)
         self.penalty = penalty
         reward = - self.E + self.pen_coeff * penalty
+        print(f"R: {reward}| E: {self.E}| Pen: {penalty}| Au: {self.Au}|"
+              f"T: {self.t_trans}| Tmax: {self.Time_max}")
 
         # Stop at Maximum Glob round
         if (step == self.max_step) & (step == self.num_Iglob):
