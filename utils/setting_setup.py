@@ -13,7 +13,6 @@ def get_arguments():
                         help="number of runs")
 
     # --------------------- Path
-    # --------------------- Path
     parser.add_argument("--data-dir", type=Path, default="D:/Datasets/",
                         help="Path to the mnist dataset")
     parser.add_argument("--model-dir", type=Path, default="./results/models/",
@@ -120,10 +119,6 @@ def get_arguments():
                         help='run on CUDA (default: False)')
     parser.add_argument('--start_steps', type=int, default=1, metavar='N',
                         help='Steps sampling random actions (default: 100)')
-    parser.add_argument('--updates_per_step', type=int, default=1, metavar='N',
-                        help='model updates per simulator step (default: 1)')
-    # parser.add_argument('--num_steps', type=int, default=1, metavar='N',
-    #                     help='maximum number of steps (default: 1000000)')
     #####################################################################################
     parser.add_argument('--low_freq', type=int, default=10000, metavar='C_u_min',
                         help='min number of CPU cycles needed to compute one sample data (default: 10000)')
