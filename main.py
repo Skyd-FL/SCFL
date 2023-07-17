@@ -20,8 +20,8 @@ args = get_arguments()
 
 table = BeautifulTable(maxwidth=140, detect_numerics=False)
 table.rows.append(["AI Network", args.ai_network, "Algorithm", args.algo, "Plot Interval", args.plot_interval])
-table.rows.append(["AI Network", args.ai_network, "Algorithm", args.algo, "Plot Interval", args.plot_interval])
-table.rows.append(["AI Network", args.ai_network, "Algorithm", args.algo, "Plot Interval", args.plot_interval])
+table.rows.append(["Comp. Cap.", args.f_u_max, "Data Size", args.data_size, "Lipschitz", args.L])
+table.rows.append(["F_c(MHz)", args.freq_carrier, "Bandwidth", args.bandwidth, "Num. User", args.user_num])
 table.rows.append(["AI Network", args.ai_network, "Algorithm", args.algo, "Plot Interval", args.plot_interval])
 
 print(table)
@@ -43,4 +43,4 @@ else:
         args,
         env
     )
-agent.train(args)
+# agent.train(args)
