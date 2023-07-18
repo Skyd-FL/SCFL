@@ -31,7 +31,7 @@ class env_agent_utils():
         return action
 
     def _decomposeAction(self, action):
-        # beta :
+        # beta [N_User] : resource allocation set
         # f_u  : maximum local computation capacity of user u
         # p_u  : maximum power of user u
         # butt : local accuracy of users
@@ -41,11 +41,13 @@ class env_agent_utils():
 
         f_u = action[0][self.N_User: 2 * self.N_User].astype(float) * self.f_u_max
         p_u = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
-        butt = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
-        tau = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
+        butt = (action[0][3 * self.N_User: 3 * self.N_User+1].astype(float))
+        tau = (action[0][3 * self.N_User+1: 3 * self.N_User+2].astype(float))
 
         return [
             np.array(beta).reshape((1, self.N_User)).squeeze(),
             np.array(f_u).reshape((1, self.N_User)).squeeze(),
-            np.array(p_u).reshape((1, self.N_User)).squeeze()
+            np.array(p_u).reshape((1, self.N_User)).squeeze(),
+            np.array([[butt]]).reshape(1, 1),
+            np.array([[tau]]).reshape(1, 1),
         ]
