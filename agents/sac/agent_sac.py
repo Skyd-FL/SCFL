@@ -42,6 +42,7 @@ class SAC(object):
         self.memory = ReplayBuffer(self.num_inputs, self.action_space, self.memory_size, self.batch_size)
         # total steps count
         self.total_step = 0
+        self.ep_step = 0
         self.episode = 0
         # mode: train / test
         self.is_test = False
@@ -75,7 +76,7 @@ class SAC(object):
 
     def step(self, curr_obs: np.ndarray, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool, bool]:
         """Take an action and return the response of the env."""
-        state_next, reward, done, info = self.env.step(action, self.total_step)
+        state_next, reward, done, info = self.env.step(action, self.ep_step)
         # print(f"reward: {reward}")
         if not self.is_test:
             self.memory.store(
@@ -195,21 +196,24 @@ class SAC(object):
         scores = []
         reward_list = []
         self.total_step = 0
+        self.ep_step = 0
 
         for self.episode_sac in range(1, num_episode + 1):
             self.is_test = False
             state = self.env.reset()
             score = 0
+            self.ep_step = 0
 
             for step in range(1, max_step + 1):
                 self.total_step += 1
+                self.ep_step += 1
                 action = self.select_action(state)
                 next_state, reward, done, info = self.step(curr_obs=state, action=action)
                 state = next_state
                 score += reward
 
                 if done:
-                    print(f"Done: Step {step} of episode: {self.episode_sac} have score {score}")
+                    print(f"Done: Step {self.total_step} of episode: {self.episode_sac} have score {score}")
                     state = self.env.reset()
                     break
 
