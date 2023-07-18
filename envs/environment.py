@@ -51,7 +51,7 @@ class SCFL_env(env_utils, env_agent_utils):
 
         self.xi = 0.1
         self.Time_max = args.tmax  # max time per round
-        self.lastSample_time = 0.1
+        self.sample_delay = 0.1
 
         # AI Model/Dataset Coefficient
         self.gamma = args.L * (1 - uniform_generator(mean=0, std=0.1))
@@ -72,9 +72,9 @@ class SCFL_env(env_utils, env_agent_utils):
             print("Invalid key")
         self.coeff_c0 = self.entropyH
         self.coeff_c1 = 1
-        mutual_I = self.coeff_c0 * np.exp(-self.coeff_c1 * self.lastSample_time)
+        mutual_I = self.coeff_c0 * np.exp(-self.coeff_c1 * 0.01)
         self.Psi = 2 ** self.entropyH * np.sqrt(2 * (self.entropyH - mutual_I))
-        print(f"this is Psi that you need :{self.Psi}")
+        print(f"Initial Psi :{self.Psi}")
 
         """ =============== """
         """     Actions     """
@@ -82,6 +82,8 @@ class SCFL_env(env_utils, env_agent_utils):
         self.beta = np.random.randint(0, self.N_User, size=[self.N_User, 1])
         self.f_u = np.reshape((np.random.rand(1, self.N_User) * self.f_u_max), (self.N_User, 1))
         self.p_u = np.reshape((np.random.rand(1, self.N_User) * self.p_u_max), (self.N_User, 1))
+        self.butt = np.reshape((np.random.rand(1, 1) * self.p_u_max), (1, 1))
+        self.tau = np.reshape((np.random.rand(1, 1) * self.p_u_max), (1, 1))
 
         """ ========================================= """
         """ ===== Function-based Initialization ===== """
@@ -104,7 +106,7 @@ class SCFL_env(env_utils, env_agent_utils):
 
     def step(self, action, step):
         penalty = 0
-        self.beta, self.f_u, self.p_u = self._decomposeAction(action)  #
+        self.beta, self.f_u, self.p_u, self.butt, self.sample_delay = self._decomposeAction(action)  #
         # Environment change
         self.User_trajectory = np.expand_dims(self._trajectory_U_Generator(), axis=0)
         self.U_location = self.User_trajectory + self.U_location
@@ -112,20 +114,18 @@ class SCFL_env(env_utils, env_agent_utils):
 
         self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)  # Re-calculate channel gain
         self.E = self._Energy()  # Energy
+        # ============= Global Iter =============
+        mutual_I = self.coeff_c0 * np.exp(-self.coeff_c1 * self.sample_delay)
+        self.Psi = 2 ** self.entropyH * np.sqrt(2 * (self.entropyH - mutual_I))
         self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
+        # =======================================
         self.factor_Iu, self.num_Iu = self._calculateLocalIteration()  # Local Iterations
         self.t_trans = self._calTimeTrans()  # Transmission Time
         self.Au = self.factor_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
-        print(f"==========================================")
-        print(f"Au: {self.Au}| factor_Iu: {self.factor_Iu}| "
-              f"num_Iu: {self.num_Iu}| C_u: {self.C_u}|"
-              f"D_u: {self.D_u}| f_u: {self.f_u}")
         # Penalty 1:
         penalty += max(np.sum(((self.Au / self.f_u + self.t_trans) - self.Time_max)), 0)
         self.penalty = penalty
-        reward = - self.E + self.pen_coeff * penalty
-        print(f"R: {reward}| E: {self.E}| Pen: {penalty}| Au: {self.Au}|"
-              f"T: {self.t_trans}| Tmax: {self.Time_max}")
+        reward = - self.E - self.pen_coeff * penalty
 
         # Stop at Maximum Glob round
         if (step == self.max_step) & (step == self.num_Iglob):
