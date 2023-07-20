@@ -212,7 +212,7 @@ class DDPGAgent:
                     )
                     pass
                 scores.append(score)
-            print(f"Episode: {self.episode}|Round/Eps:{num_frames}|"
+            print(f"Episode: {self.episode}|Round/Eps:{step}|"
                   f"Score {score}|Penalty:{self.env.penalty}|"
                   f"Energy:{self.env.E}|Iu:{self.env.num_Iu}|"
                   f"Trans Time:{sum(self.env.t_trans[0]) / len(self.env.t_trans[0])}")
