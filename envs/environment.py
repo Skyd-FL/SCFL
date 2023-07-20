@@ -95,7 +95,7 @@ class SCFL_env(env_utils, env_agent_utils):
 
         self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)
         self.commonDataRate = self._calculateDataRate(self.ChannelGain)
-        self.E = 0  # initialize rewards)
+        self.E = 0  # initialize rewards
 
         """ ============================ """
         """     Environment Settings     """
@@ -107,6 +107,11 @@ class SCFL_env(env_utils, env_agent_utils):
     def step(self, action, step):
         penalty = 0
         self.beta, self.f_u, self.p_u, self.butt, self.sample_delay = self._decomposeAction(action)  #
+        # print(f"beta: {self.beta}")
+        # print(f"f_u: {self.f_u}")
+        # print(f"p_u: {self.p_u}")
+        # print(f"butt: {self.butt}")
+        # print(f"sample_delay: {self.sample_delay}")
         # Environment change
         self.User_trajectory = np.expand_dims(self._trajectory_U_Generator(), axis=0)
         self.U_location = self.User_trajectory + self.U_location
