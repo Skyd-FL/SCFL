@@ -133,7 +133,7 @@ class SCFL_env(env_utils, env_agent_utils):
         reward = - self.E - self.pen_coeff * penalty
 
         # Stop at Maximum Glob round
-        if (step == self.max_step) & (step == self.num_Iglob):
+        if (step == self.max_step) or (step == self.num_Iglob):
             done = True
         else:
             done = False
