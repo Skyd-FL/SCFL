@@ -58,6 +58,10 @@ def get_arguments():
                         help="signal bandwidth")
     parser.add_argument("--L", type=float, default=50,
                         help="Lipschitz smooth variables")
+    parser.add_argument("--sample-delay", type=float, default=0.1,
+                        help="Delay of real-time sampling")
+    parser.add_argument("--skip-max", type=float, default=100,
+                        help="Max sample skip")
 
     """ ======================================================== """
     """ ===================== Agent config ===================== """
@@ -98,9 +102,6 @@ def get_arguments():
     parser.add_argument('--target_update_interval', type=int, default=1,
                         metavar='N',
                         help='Value target update per no. of updates per step (default: 1)')
-    # parser.add_argument('--tau1', type=float, default=0.005,
-    #                     metavar='G',
-    #                     help='target smoothing coefficient(τ) (default: 0.005)')
     parser.add_argument('--alpha', type=float, default=0.2,
                         metavar='G',
                         help='Temperature parameter α determines the relative importance of the entropy\
@@ -128,9 +129,9 @@ def get_arguments():
                         help='Data size of user to transmit [bit] (default: 30000)')
     parser.add_argument('--f-u-max', type=float, default=2e9, metavar='computation_capacity_max',
                         help='Computation capacity of user [Hz] (default: 20e6)')
-    parser.add_argument('--eta_accuracy', type=float, default=0.01, metavar='local_accuracy',
+    parser.add_argument('--local-acc', type=float, default=0.01, metavar='local_accuracy',
                         help='Local accuracy of system (default: 0.01)')
-    parser.add_argument('--epsilon0_accuracy', type=float, default=0.01, metavar='global_accuracy',
+    parser.add_argument('--global-acc', type=float, default=0.9, metavar='global_accuracy',
                         help='Global accuracy of system (default: 0.01)')
     parser.add_argument('--tmax', type=int, default=10, metavar='T_max',
                         help='Upper bound of time completion (default: 1000)')
