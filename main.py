@@ -23,6 +23,7 @@ table.rows.append(["AI Network", args.ai_network, "Algorithm", args.algo, "Plot 
 table.rows.append(["Gamma", args.gamma, "Tau", args.tau, "Learning Rate", args.lr_critic])
 table.rows.append(["Comp. Cap.", args.f_u_max, "Data Size", args.data_size, "Lipschitz", args.L])
 table.rows.append(["F_c(MHz)", args.freq_carrier, "Bandwidth", args.bandwidth, "Num. User", args.user_num])
+table.rows.append(["Sampling D", args.sample_delay, "Max Skip D", args.skip_max, "Num. User", args.user_num])
 
 print(table)
 
