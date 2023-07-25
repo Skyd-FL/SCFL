@@ -83,6 +83,7 @@ class DDPGAgent:
         self.transition = list()
 
         # total steps count
+        self.local_step = 0
         self.total_step = 0
         self.episode = 0
         # mode: train / test
@@ -111,7 +112,7 @@ class DDPGAgent:
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool]:
         """Take an action and return the response of the env."""
-        state_next, reward, done, info = self.env.step(action, self.total_step)
+        state_next, reward, done, info = self.env.step(action, self.local_step)
         # print(f"reward: {reward}")
         if not self.is_test:
             self.transition += [reward, state_next, done]
@@ -176,21 +177,23 @@ class DDPGAgent:
         for self.episode in range(1, num_ep + 1):
             self.is_test = False
             state = self.env.reset()
-            score = 0
+            self.local_step = 0
+            score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
 
             for step in range(1, num_frames + 1):
                 self.total_step += 1
+                self.local_step += 1
                 action = self.select_action(state)
                 state_next, reward, done, info = self.step(action)
                 state = state_next
+
                 score = score + reward
-                # if episode ends
-                if done:
-                    print(f"done: step: {step} of episode: {self.episode}")
-                    state = self.env.reset()
-                    scores.append(score)
-                    score = 0
-                    break
+                pen_tot += self.env.penalty
+                E_tot += self.env.E
+                Iu_tot += self.env.num_Iu
+                IG_tot += self.env.num_Iglob
+                T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
+                beta_avg += np.average(self.beta)
 
                 # if training is ready
                 if (
@@ -201,7 +204,6 @@ class DDPGAgent:
                     actor_losses.append(actor_loss.cpu())
                     critic_losses.append(critic_loss.cpu())
                     reward_list.append(reward)
-
                 # plotting
                 if self.total_step % plotting_interval == 0:
                     self._plot(
@@ -210,12 +212,15 @@ class DDPGAgent:
                         actor_losses,
                         critic_losses,
                     )
-                    pass
+                # if episode ends
+                if done:
+                    break
                 scores.append(score)
-            print(f"Episode: {self.episode}|Round/Eps:{num_frames}|"
-                  f"Score {score}|Penalty:{self.env.penalty}|"
-                  f"Energy:{self.env.E}|Iu:{self.env.num_Iu}|"
-                  f"Trans Time:{sum(self.env.t_trans[0]) / len(self.env.t_trans[0])}")
+            print(f"Episode: {self.episode}|Round:{self.local_step}|"
+                  f"Score {score[0] / self.local_step}|Penalty:{pen_tot/self.local_step}|"
+                  f"Energy:{E_tot/self.local_step}|Iu:{Iu_tot/self.local_step}|"
+                  f"IG:{IG_tot/self.local_step}|E_tot:{E_tot/self.local_step*IG_tot}|"
+                      f"Trans Time:{T_tot / self.local_step}")
         if args.save_flag:
             save_results(
                 scores,
@@ -224,6 +229,11 @@ class DDPGAgent:
                 reward_list,
                 algo_name
             )
+        df_results = pd.DataFrame(list_results, columns=['episode', 'score'])
+        result_path = "./results/"
+        file_path = result_path + "{}.csv".format(algo_name)
+        df_results.to_csv(file_path)
+
         save_item(self,
                   self.actor.state_dict(),
                   self.critic.state_dict(),
@@ -274,6 +284,7 @@ class DDPGAgent:
             critic_losses: List[float],
     ):
         """Plot the training progresses."""
+
         def subplot(loc: int, title: str, values: List[float]):
             plt.subplot(loc)
             plt.title(title)
