@@ -34,6 +34,8 @@ def save_results(
 def save_item(item_actor, item_critic, item_name, folder_name):
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
+    print(folder_name)
+    print(item_name)
     torch.save(item_actor, os.path.join(folder_name, "actor-" + item_name + ".pt"))
     torch.save(item_critic, os.path.join(folder_name, "critic-" + item_name + ".pt"))
 
