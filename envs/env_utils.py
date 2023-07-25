@@ -47,7 +47,8 @@ class env_utils():
         speed_of_light = 3 * 10 ** 8  # Speed of light in meters per second
         pi = math.pi
         awgn_coeff = np.random.normal(1, sigma_data)
-        ChannelGain = (speed_of_light * awgn_coeff / (4 * pi * (self.freq_carrier * 10**6) * self.distance_CU_BS)) ** 0.5
+        ChannelGain = (speed_of_light * awgn_coeff / (
+                    4 * pi * (self.freq_carrier * 10 ** 6) * self.distance_CU_BS)) ** 0.5
 
         return np.array(ChannelGain)
 
@@ -64,7 +65,7 @@ class env_utils():
         """
         mini_eps = 10 ** (-28)
         Numerator = channelGain_BS_CU * self.p_u  # self.P must be a list among all users [1, ... , U]
-        Denominator = self.B * self.beta * self.sigma + mini_eps # self.B must be a list among all users [1, ... , U]
+        Denominator = self.B * self.beta * self.sigma + mini_eps  # self.B must be a list among all users [1, ... , U]
 
         DataRate = self.B * self.beta * np.log2(1 + (Numerator / Denominator))
         return DataRate
@@ -81,19 +82,28 @@ class env_utils():
         ==================================================
         :return: required number of rounds for convergence
         """
-        Numerator = np.log(1 / self.epsilon0_accuracy) * 2 * self.N_User * self.Lipschitz * self.xi
-        Denominator = self.xi * (self.Lipschitz + 2) * self.Psi + \
-                      self.xi * self.Lipschitz / self.N_User - self.eta_accuracy * self.gamma
+        mutual_I = self.coeff_c0 * np.exp(-self.coeff_c1 * self.sample_delay * self.sample_skip)
+        self.Psi = 2 ** self.entropyH * np.sqrt(2 * (self.entropyH - mutual_I))
+
+        Numerator = np.log(1 / self.target_acc) * 2 * self.N_User * (self.Lipschitz**2) * self.xi
+        Denominator = (self.xi * (self.Lipschitz + 2) * self.Psi) + \
+                      (self.xi * self.Lipschitz / self.N_User) - (self.local_acc * self.gamma)
+
+        # print(f"Target Acc: {np.log(1 / self.target_acc)}|S: {self.sample_skip}|"
+        #       f"D: {self.sample_delay}|S: {self.sample_skip}|"
+        #       f"Psi: {self.Psi}|"
+        #       f"Numerator: {Numerator}|Denominator: {Denominator}|"
+        #       f"|IG:{Numerator/Denominator}")
         return Numerator / Denominator
 
     def _calculateLocalIteration(self):
         v = 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma)
-        w = np.log2(1 / self.eta_accuracy)
-        return v, v*w
+        w = np.log2(1 / self.local_acc)
+        return v, v * w
 
     def _calTimeTrans(self):
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
-        return np.divide(self.data_size, self.DataRate)
+        return np.divide(1, self.DataRate)
 
     def _Energy(self):
         """
@@ -102,13 +112,10 @@ class env_utils():
         """
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
         # Calculate computation energy
-        self.num_Iu = 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma) * np.log2(1 / self.eta_accuracy)
+        self.factor_Iu, self.num_Iu = self._calculateLocalIteration()  # Local Iterations
         self.EC_u = self.num_Iu * self.kappa * self.C_u * self.D_u * self.f_u ** 2
         # Calculate transmission energy
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u, self.t_trans)
-
-        # print(f"EC_u: {self.EC_u} = {np.sum(self.EC_u)}| ET_u: {self.ET_u} = {np.sum(self.ET_u)} | "
-        #       f"P_u: {self.p_u}| T: {self.t_trans}")
 
         return np.sum(self.EC_u) + np.sum(self.ET_u)
