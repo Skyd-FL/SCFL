@@ -48,17 +48,19 @@ class SCFL_env(env_utils, env_agent_utils):
         # effective switched capacitance that depends on the chip architecture
         self.kappa = 10**(-28)
         self.f_u_max = args.f_u_max
+        self.skip_max = args.skip_max
 
-        self.xi = 0.1
+        self.xi = 0.5
         self.Time_max = args.tmax  # max time per round
-        self.sample_delay = 0.1
+        self.sample_delay = args.sample_delay
+        self.sample_skip = 1
 
         # AI Model/Dataset Coefficient
         self.gamma = args.L * (1 - uniform_generator(mean=0, std=0.1))
         self.Lipschitz = args.L
         self.delta = (2 / args.L) * (1 - uniform_generator(mean=0.2, std=0.2))
-        self.eta_accuracy = args.eta_accuracy  # target local accuracy
-        self.epsilon0_accuracy = args.epsilon0_accuracy  # target global accuracy
+        self.local_acc = args.local_acc  # target local accuracy
+        self.target_acc = args.global_acc  # target global accuracy
 
         """ Generalization Gap Calculation """
         self.dataset = "mnist"  # Choose the dataset to get the entropy value , option ["mnist","cifar10"]
@@ -106,31 +108,28 @@ class SCFL_env(env_utils, env_agent_utils):
 
     def step(self, action, step):
         penalty = 0
-        self.beta, self.f_u, self.p_u, self.butt, self.sample_delay = self._decomposeAction(action)  #
+        self.beta, self.f_u, self.p_u, self.butt, self.sample_skip = self._decomposeAction(action)  #
         # print(f"beta: {self.beta}")
         # print(f"f_u: {self.f_u}")
         # print(f"p_u: {self.p_u}")
         # print(f"butt: {self.butt}")
-        # print(f"sample_delay: {self.sample_delay}")
+        # print(f"sample_delay: {self.sample_delay} * {self.sample_skip} = {self.sample_delay*self.sample_skip}")
         # Environment change
         self.User_trajectory = np.expand_dims(self._trajectory_U_Generator(), axis=0)
         self.U_location = self.User_trajectory + self.U_location
         state_next = self._wrapState()  # State wrap
-
         self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)  # Re-calculate channel gain
         self.E = self._Energy()  # Energy
         # ============= Global Iter =============
-        mutual_I = self.coeff_c0 * np.exp(-self.coeff_c1 * self.sample_delay)
-        self.Psi = 2 ** self.entropyH * np.sqrt(2 * (self.entropyH - mutual_I))
         self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
         # =======================================
-        self.factor_Iu, self.num_Iu = self._calculateLocalIteration()  # Local Iterations
         self.t_trans = self._calTimeTrans()  # Transmission Time
         self.Au = self.factor_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
         # Penalty 1:
         penalty += max(np.sum(((self.Au / self.f_u + self.t_trans) - self.Time_max)), 0)
+        penalty += 0.01*self.num_Iglob
         self.penalty = penalty
-        reward = - self.E - self.pen_coeff * penalty
+        reward = - self.E + self.pen_coeff * penalty  # Minimize E / Minimize num_Iglob / Minimize penalty
 
         # Stop at Maximum Glob round
         if (step == self.max_step) or (step == self.num_Iglob):
