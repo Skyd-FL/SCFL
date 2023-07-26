@@ -63,7 +63,7 @@ class SAC(object):
             self.alpha = 0
             self.automatic_entropy_tuning = False
             self.actor = DeterministicPolicy(self.num_inputs, self.action_space, args.hidden_size,
-                                              self.action_space).to(self.device)
+                                             self.action_space).to(self.device)
             self.actor_optim = Adam(self.actor.parameters(), lr=args.lr_actor)
 
     def select_action(self, state, evaluate=False):
@@ -72,7 +72,7 @@ class SAC(object):
             action, _, _ = self.actor.sample(state)
         else:
             _, _, action = self.actor.sample(state)
-        return action.detach().cpu().numpy()[0]
+        return np.clip(action.detach().cpu().numpy()[0], 0, 1)
 
     def step(self, curr_obs: np.ndarray, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool, bool]:
         """Take an action and return the response of the env."""
@@ -188,7 +188,7 @@ class SAC(object):
         algo_name = str(num_episode) + "-" + str(max_step) + \
                     "-" + str(args.user_num) + "-" + str(args.pen_coeff) + \
                     "-" + args.drl_algo + "-" + str(args.batch_size) + \
-                    "-" + args.ai_network
+                    "-" + args.ai_network + "-" + args.algo
         """Train the agent."""
         list_results = []
         actor_losses = []
@@ -201,28 +201,41 @@ class SAC(object):
         for self.episode_sac in range(1, num_episode + 1):
             self.is_test = False
             state = self.env.reset()
-            score = 0
             self.ep_step = 0
+            score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
+            beta_avg, p_avg, skip_avg = 0, 0, 0
+            actor_avg, critic_avg = 0, 0
 
             for step in range(1, max_step + 1):
                 self.total_step += 1
                 self.ep_step += 1
                 action = self.select_action(state)
-                next_state, reward, done, info = self.step(curr_obs=state, action=action)
-                state = next_state
-                score += reward
+                state_next, reward, done, info = self.step(curr_obs=state, action=action)
+                state = state_next
+
+                score = score + reward
+                pen_tot += self.env.penalty
+                E_tot += self.env.E
+                Iu_tot += self.env.num_Iu
+                # IG_tot += self.env.num_Iglob
+                T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
+                beta_avg += np.average(self.env.beta)
+                p_avg += np.average(self.env.p_u)
+                # skip_avg += np.average(self.env.sample_skip)
 
                 if done:
-                    print(f"Done: Step {self.total_step} of episode: {self.episode_sac} have score {score}")
+                    list_results.append([self.episode_sac, score])
                     state = self.env.reset()
                     break
 
                 if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
-                    actor_loss, critic_loss, policy_loss, ent_loss, alpha = self.update_parameters(self.memory,
-                                                                                                   self.total_step)
-
+                    critic_1_loss, critic_2_loss, \
+                    actor_loss, ent_loss, alpha = self.update_parameters(self.memory,
+                                                                          self.total_step)
+                    actor_avg += actor_loss
+                    critic_avg += (critic_1_loss + critic_2_loss) / 2
                     actor_losses.append(actor_loss)
-                    critic_losses.append(critic_loss)
+                    critic_losses.append((critic_1_loss + critic_2_loss) / 2)
                     reward_list.append(reward)
                 if self.total_step % plotting_interval == 0:
                     self._plot(
@@ -233,11 +246,13 @@ class SAC(object):
                     )
                     pass
                 scores.append(score)
-            print(f"Episode: {self.episode_sac}|Round/Eps:{max_step}|"
-                  f"Score {score}|Penalty:{self.env.penalty}|"
-                  f"Trans Time:{sum(self.env.t_trans[0]) / len(self.env.t_trans[0])}|"
-                  f"Energy:{self.env.E}|Iu:{self.env.num_Iu}|"
-                  f"Global Round: {self.env.num_Iglob}")
+            print(f"Episode: {self.episode_sac}|Round:{self.ep_step}|"
+                  f"Score {score / self.ep_step}|Penalty:{pen_tot / self.ep_step}|"
+                  f"Energy:{E_tot / self.ep_step}|Iu:{Iu_tot / self.ep_step}|"
+                  f"IG:{self.ep_step}|E_tot:{E_tot / self.ep_step * IG_tot}|"
+                  f"p_avg:{p_avg / self.ep_step}|Trans Time:{T_tot / self.ep_step}")
+            if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
+                print(f"actor: {actor_avg / self.ep_step}|critic: {critic_avg / self.ep_step}")
         if args.save_flag:
             save_results(
                 scores,
