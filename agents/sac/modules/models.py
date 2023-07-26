@@ -85,8 +85,8 @@ class GaussianPolicy(nn.Module):
         #     self.action_bias = torch.FloatTensor(
         #         (action_space.high + action_space.low) / 2.)
         else:
-            self.action_scale = torch.tensor(0.9 - 0.1) / 2
-            self.action_bias = torch.tensor(0.9 + 0.1) / 2
+            self.action_scale = torch.tensor(1 - 0) / 2
+            self.action_bias = torch.tensor(1 + 0) / 2
 
     def forward(self, state):
         x = F.relu(self.linear1(state))
@@ -101,14 +101,14 @@ class GaussianPolicy(nn.Module):
         std = log_std.exp()
         normal = Normal(mean, std)
         x_t = normal.rsample()  # for parameterization trick (mean + std * N(0,1))
-        y_t = torch.sigmoid(x_t)
+        y_t = torch.tanh(x_t)
         action = y_t * self.action_scale + self.action_bias
         log_prob = normal.log_prob(x_t)
         # Enforcing Action Bound
         log_prob -= torch.log(self.action_scale * (1 - y_t.pow(2)) + epsilon)
         log_prob = log_prob.sum(1, keepdim=True)
-        mean = torch.sigmoid(mean) * self.action_scale + self.action_bias
-        return action.clamp(0, 1), log_prob, mean.clamp(0, 1)
+        mean = torch.tanh(mean) * self.action_scale + self.action_bias
+        return action, log_prob, mean
 
     def to(self, device):
         self.action_scale = self.action_scale.to(device)
@@ -137,13 +137,13 @@ class DeterministicPolicy(nn.Module):
         #     self.action_bias = torch.FloatTensor(
         #         (action_space.high + action_space.low) / 2.)
         else:
-            self.action_scale = torch.tensor(0.9 - 0.1) / 2
-            self.action_bias = torch.tensor(0.9 + 0.1) / 2
+            self.action_scale = torch.tensor(1 - 0) / 2
+            self.action_bias = torch.tensor(1 + 0) / 2
 
     def forward(self, state):
         x = F.relu(self.linear1(state))
         x = F.relu(self.linear2(x))
-        mean = torch.sigmoid(self.mean(x)) * self.action_scale + self.action_bias
+        mean = torch.tanh(self.mean(x)) * self.action_scale + self.action_bias
         return mean
 
     def sample(self, state):
@@ -151,7 +151,7 @@ class DeterministicPolicy(nn.Module):
         noise = self.noise.normal_(0., std=0.1)
         noise = noise.clamp(-0.25, 0.25)
         action = mean + noise
-        return action.clamp(0, 1), torch.tensor(0.), mean.clamp(0, 1)
+        return action, torch.tensor(0.), mean
 
     def to(self, device):
         self.action_scale = self.action_scale.to(device)
