@@ -63,7 +63,7 @@ class env_utils():
         Denominator = N_0 * B_k
         Datarate = B_k np.log2(1+Numerator/Denominator)
         """
-        mini_eps = 10 ** (-28)
+        mini_eps = 10 ** (-10)
         Numerator = channelGain_BS_CU * self.p_u  # self.P must be a list among all users [1, ... , U]
         Denominator = self.B * self.beta * self.sigma + mini_eps  # self.B must be a list among all users [1, ... , U]
 
@@ -103,12 +103,11 @@ class env_utils():
 
     def _calTimeTrans(self):
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
-        return np.divide(1, self.DataRate)
+        return np.divide(self.data_size, self.DataRate)
 
     def _Energy(self):
         """
         Intermediate Energy
-        :return:
         """
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
         # Calculate computation energy
@@ -118,4 +117,4 @@ class env_utils():
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u, self.t_trans)
 
-        return np.sum(self.EC_u) + np.sum(self.ET_u)
+        return np.sum(self.ET_u)        # np.sum(self.EC_u) +
