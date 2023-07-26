@@ -12,21 +12,24 @@ class env_agent_utils():
 
     def _wrapState(self):
         self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)
-        state = np.array(self.ChannelGain).reshape(1, -1)
+        state = np.concatenate((np.array(self.ChannelGain).reshape(1, -1), np.array(self.U_location).reshape(1, -1),
+                                np.array(self.User_trajectory).reshape(1, -1)), axis=1)
         return state
 
     def _decomposeState(self, state):
         H = state[0: self.N_User]
+        U_location = state[self.N_User: 2 * self.N_User + 2]
+        User_trajectory = state[self.N_User + 2: 2 * self.N_User + 4]
         return [
-            np.array(H)
+            np.array(H), np.array(U_location), np.array(User_trajectory)
         ]
 
     def _wrapAction(self):
         action = np.concatenate((np.array([[self.beta]]).reshape(1, self.N_User),
                                  np.array([[self.f_u]]).reshape(1, self.N_User),
                                  np.array([[self.p_u]]).reshape(1, self.N_User),
-                                 np.array([[self.butt]]).reshape(1, 1),
-                                 np.array([[self.tau]]).reshape(1, 1),
+                                 # np.array([[self.butt]]).reshape(1, 1),
+                                 # np.array([[self.tau]]).reshape(1, 1),
                                  ), axis=1)
         return action
 
@@ -42,16 +45,12 @@ class env_agent_utils():
         f_u = action[0][self.N_User: 2 * self.N_User].astype(float) * self.f_u_max
         p_u = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
         butt = (action[0][3 * self.N_User: 3 * self.N_User+1].astype(float))
-<<<<<<< Updated upstream
-        tau = (action[0][3 * self.N_User+1: 3 * self.N_User+2].astype(float)) * 100
-=======
->>>>>>> Stashed changes
-
+        # tau = (action[0][3 * self.N_User+1: 3 * self.N_User+2].astype(float)) * 100
         tau = (action[0][3 * self.N_User+1: 3 * self.N_User+2].astype(float)) * self.skip_max
         return [
             np.array(beta).reshape((1, self.N_User)).squeeze(),
             np.array(f_u).reshape((1, self.N_User)).squeeze(),
             np.array(p_u).reshape((1, self.N_User)).squeeze(),
-            np.array([[butt]]).reshape(1, 1),
-            np.round(np.array([[tau]]).reshape(1, 1)),
+            # np.array([[butt]]).reshape(1, 1),
+            # np.round(np.array([[tau]]).reshape(1, 1)),
         ]
