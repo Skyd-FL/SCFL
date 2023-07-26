@@ -191,9 +191,9 @@ class DDPGAgent:
                 pen_tot += self.env.penalty
                 E_tot += self.env.E
                 Iu_tot += self.env.num_Iu
-                IG_tot += self.env.num_Iglob
+                # IG_tot += self.env.num_Iglob
                 T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
-                beta_avg += np.average(self.beta)
+                # beta_avg += np.average(self.beta)
 
                 # if training is ready
                 if (
@@ -215,12 +215,13 @@ class DDPGAgent:
                 # if episode ends
                 if done:
                     break
-                scores.append(score)
+            scores.append(score)
+            list_results.append([self.episode, score])
             print(f"Episode: {self.episode}|Round:{self.local_step}|"
-                  f"Score {score[0] / self.local_step}|Penalty:{pen_tot/self.local_step}|"
+                  f"Score {score / self.local_step}|Penalty:{pen_tot/self.local_step}|"
                   f"Energy:{E_tot/self.local_step}|Iu:{Iu_tot/self.local_step}|"
-                  f"IG:{IG_tot/self.local_step}|E_tot:{E_tot/self.local_step*IG_tot}|"
-                      f"Trans Time:{T_tot / self.local_step}")
+                  # f"IG:{IG_tot/self.local_step}|E_tot:{E_tot/self.local_step*IG_tot}|"
+                  f"Trans Time:{T_tot / self.local_step}")
         if args.save_flag:
             save_results(
                 scores,
