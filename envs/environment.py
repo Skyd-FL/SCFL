@@ -108,7 +108,9 @@ class SCFL_env(env_utils, env_agent_utils):
 
     def step(self, action, step):
         penalty = 0
-        self.beta, self.f_u, self.p_u, self.butt, self.sample_skip = self._decomposeAction(action)  #
+        # self.beta, self.f_u, self.p_u, self.butt, self.sample_skip = self._decomposeAction(action)  #
+        self.beta, self.f_u, self.p_u = self._decomposeAction(action)  #
+
         # print(f"beta: {self.beta}")
         # print(f"f_u: {self.f_u}")
         # print(f"p_u: {self.p_u}")
@@ -121,18 +123,16 @@ class SCFL_env(env_utils, env_agent_utils):
         self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)  # Re-calculate channel gain
         self.E = self._Energy()  # Energy
         # ============= Global Iter =============
-        self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
-        # =======================================
-        self.t_trans = self._calTimeTrans()  # Transmission Time
-        self.Au = self.factor_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
+        # self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
+        # self.Au = self.factor_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
         # Penalty 1:
-        penalty += max(np.sum(((self.Au / self.f_u + self.t_trans) - self.Time_max)), 0)
-        penalty += 0.01*self.num_Iglob
+        # penalty += max(np.sum(((self.Au / self.f_u + self.t_trans) - self.Time_max)), 0)
+        # penalty += 0.01*self.num_Iglob
         self.penalty = penalty
-        reward = - self.E + self.pen_coeff * penalty  # Minimize E / Minimize num_Iglob / Minimize penalty
-
+        # reward = -self.E + self.pen_coeff * penalty  # Minimize E / Minimize num_Iglob / Minimize penalty
+        reward = - np.average(self.t_trans)
         # Stop at Maximum Glob round
-        if (step == self.max_step) or (step == self.num_Iglob):
+        if (step == self.max_step):  #  or (step == self.num_Iglob):
             done = True
         else:
             done = False
