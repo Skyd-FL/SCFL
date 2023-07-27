@@ -28,8 +28,8 @@ class env_agent_utils():
         action = np.concatenate((np.array([[self.beta]]).reshape(1, self.N_User),
                                  np.array([[self.f_u]]).reshape(1, self.N_User),
                                  np.array([[self.p_u]]).reshape(1, self.N_User),
-                                 # np.array([[self.butt]]).reshape(1, 1),
-                                 # np.array([[self.tau]]).reshape(1, 1),
+                                 np.array([[self.butt]]).reshape(1, 1),
+                                 np.array([[self.tau]]).reshape(1, 1),
                                  ), axis=1)
         return action
 
@@ -51,6 +51,6 @@ class env_agent_utils():
             np.array(beta).reshape((1, self.N_User)).squeeze(),
             np.array(f_u).reshape((1, self.N_User)).squeeze(),
             np.array(p_u).reshape((1, self.N_User)).squeeze(),
-            # np.array([[butt]]).reshape(1, 1),
-            # np.round(np.array([[tau]]).reshape(1, 1)),
+            np.array([[butt]]).reshape(1, 1),
+            np.round(np.array([[tau]]).reshape(1, 1)),
         ]
