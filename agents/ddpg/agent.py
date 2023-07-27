@@ -166,7 +166,7 @@ class DDPGAgent:
         algo_name = str(num_ep) + "-" + str(num_frames) + \
                     "-" + str(args.user_num) + "-" + str(args.pen_coeff) + \
                     "-" + args.drl_algo + "-" + str(args.batch_size) + \
-                    "-" + args.ai_network
+                    "-" + args.ai_network + "-" + args.algo
         """Train the agent."""
         list_results = []
         actor_losses = []
@@ -179,6 +179,8 @@ class DDPGAgent:
             state = self.env.reset()
             self.local_step = 0
             score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
+            beta_avg, p_avg, skip_avg = 0, 0, 0
+            actor_avg, critic_avg = 0, 0
 
             for step in range(1, num_frames + 1):
                 self.total_step += 1
@@ -193,7 +195,9 @@ class DDPGAgent:
                 Iu_tot += self.env.num_Iu
                 # IG_tot += self.env.num_Iglob
                 T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
-                # beta_avg += np.average(self.beta)
+                beta_avg += np.average(self.env.beta)
+                p_avg += np.average(self.env.p_u)
+                # skip_avg += np.average(self.env.sample_skip)
 
                 # if training is ready
                 if (
@@ -201,6 +205,8 @@ class DDPGAgent:
                         and self.total_step > self.initial_random_steps
                 ):
                     actor_loss, critic_loss = self.update_model()
+                    actor_avg += actor_loss
+                    critic_avg += critic_loss
                     actor_losses.append(actor_loss.cpu())
                     critic_losses.append(critic_loss.cpu())
                     reward_list.append(reward)
@@ -218,10 +224,12 @@ class DDPGAgent:
             scores.append(score)
             list_results.append([self.episode, score])
             print(f"Episode: {self.episode}|Round:{self.local_step}|"
-                  f"Score {score / self.local_step}|Penalty:{pen_tot/self.local_step}|"
-                  f"Energy:{E_tot/self.local_step}|Iu:{Iu_tot/self.local_step}|"
-                  # f"IG:{IG_tot/self.local_step}|E_tot:{E_tot/self.local_step*IG_tot}|"
-                  f"Trans Time:{T_tot / self.local_step}")
+                  f"Score {score / self.local_step}|Penalty:{pen_tot / self.local_step}|"
+                  f"Energy:{E_tot / self.local_step}|Iu:{Iu_tot / self.local_step}|"
+                  f"IG:{self.local_step}|E_tot:{E_tot / self.local_step * IG_tot}|"
+                  f"p_avg:{p_avg / self.local_step}|Trans Time:{T_tot / self.local_step}")
+            if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
+                print(f"actor: {actor_avg / self.local_step}|critic: {critic_avg / self.local_step}")
         if args.save_flag:
             save_results(
                 scores,
