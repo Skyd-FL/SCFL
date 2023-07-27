@@ -188,7 +188,7 @@ class SAC(object):
         algo_name = str(num_episode) + "-" + str(max_step) + \
                     "-" + str(args.user_num) + "-" + str(args.pen_coeff) + \
                     "-" + args.drl_algo + "-" + str(args.batch_size) + \
-                    "-" + args.ai_network + "-" + args.algo + "-" + args.poweru_max
+                    "-" + args.ai_network + "-" + args.algo + "-" + str(args.poweru_max)
         """Train the agent."""
         list_results = []
         actor_losses = []
