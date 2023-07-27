@@ -88,13 +88,7 @@ class env_utils():
         Numerator = np.log(1 / self.target_acc) * 2 * self.N_User * (self.Lipschitz**2) * self.xi
         Denominator = (self.xi * (self.Lipschitz + 2) * self.Psi) + \
                       (self.xi * self.Lipschitz / self.N_User) - (self.local_acc * self.gamma)
-
-        # print(f"Target Acc: {np.log(1 / self.target_acc)}|S: {self.sample_skip}|"
-        #       f"D: {self.sample_delay}|S: {self.sample_skip}|"
-        #       f"Psi: {self.Psi}|"
-        #       f"Numerator: {Numerator}|Denominator: {Denominator}|"
-        #       f"|IG:{Numerator/Denominator}")
-        return Numerator / Denominator
+        return np.average(Numerator / Denominator)
 
     def _calculateLocalIteration(self):
         v = 2 / ((2 - self.Lipschitz * self.delta) * self.delta * self.gamma)
@@ -117,4 +111,4 @@ class env_utils():
         # Calculate transmission energy
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u, self.t_trans)
-        return np.sum(self.ET_u)+np.sum(self.EC_u)+self.ES_u
+        return np.average(self.ET_u)+np.average(self.EC_u)+np.average(self.ES_u)
