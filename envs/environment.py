@@ -125,12 +125,14 @@ class SCFL_env(env_utils, env_agent_utils):
         self.E = self._Energy()  # Energy
         # ============= Global Iter =============
         self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
+        if self.num_Iglob < 0:
+            print(f"local_acc:{self.butt}|skip:{self.sample_skip}")
         self.Au = self.factor_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
         # Penalty 1:
         # penalty += max(np.sum(((self.Au / self.f_u + self.t_trans) - self.Time_max)), 0)
         # penalty += 0.01*self.num_Iglob
         self.penalty = penalty
-        reward = -self.E + self.pen_coeff * penalty  # Minimize E / Minimize num_Iglob / Minimize penalty
+        reward = self.num_Iglob * (-self.E + self.pen_coeff * penalty)  # Minimize E / Minimize num_Iglob / Minimize penalty
         # reward = - np.average(self.t_trans)
         # Stop at Maximum Glob round
         if (step == self.max_step):  #  or (step == self.num_Iglob):
