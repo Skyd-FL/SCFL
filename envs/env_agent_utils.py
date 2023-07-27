@@ -39,9 +39,8 @@ class env_agent_utils():
         # p_u  : maximum power of user u
         # butt : local accuracy of users
         # tau  : sampling delay
-        mini_eps = 10e-10
         beta = action[0][0: self.N_User].astype(float)
-        beta = scipy.special.softmax(beta+mini_eps, axis=None)
+        beta = scipy.special.softmax(beta, axis=None)
 
         f_u = action[0][self.N_User: 2 * self.N_User].astype(float) * self.f_u_max
         p_u = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
