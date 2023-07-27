@@ -63,7 +63,7 @@ class env_utils():
         Denominator = N_0 * B_k
         Datarate = B_k np.log2(1+Numerator/Denominator)
         """
-        mini_eps = 10 ** (-10)
+        mini_eps = 10 ** (-30)
         Numerator = channelGain_BS_CU * self.p_u  # self.P must be a list among all users [1, ... , U]
         Denominator = self.B * self.beta * self.sigma + mini_eps  # self.B must be a list among all users [1, ... , U]
 
