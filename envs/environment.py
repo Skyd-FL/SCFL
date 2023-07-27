@@ -27,15 +27,15 @@ class SCFL_env(env_utils, env_agent_utils):
         # Power setting
         self.p_u_max = args.poweru_max
         self.eta = 0.7  # de tinh R_u
-        self.sigma = 3.9811 * (np.e ** (-21 + 7))  # -174 dBm/Hz -> W/Hz
+        self.sigma = 3.9811 * (10 ** (-21))  # -174 dBm/Hz -> W/Hz
         # Bandwidth
         self.B = args.bandwidth
 
         # Base station initialization
         self.BS_x = 0
         self.BS_y = 0
-        self.BS_R_Range = 1
-        self.BS_R_min = 0.1
+        self.BS_R_Range = 0.1
+        self.BS_R_min = 0.01
 
         # initialization
         self.low_freq = args.low_freq
