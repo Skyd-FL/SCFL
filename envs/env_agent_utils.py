@@ -46,7 +46,7 @@ class env_agent_utils():
         p_u = (action[0][2 * self.N_User: 3 * self.N_User].astype(float)) * self.p_u_max
         butt = (action[0][3 * self.N_User: 3 * self.N_User+1].astype(float))
         # tau = (action[0][3 * self.N_User+1: 3 * self.N_User+2].astype(float)) * 100
-        tau = (action[0][3 * self.N_User+1: 3 * self.N_User+2].astype(float)) * self.skip_max
+        tau = (action[0][3 * self.N_User+1: 3 * self.N_User+2].astype(float)) * (self.skip_max-1) + 1
         return [
             np.array(beta).reshape((1, self.N_User)).squeeze(),
             np.array(f_u).reshape((1, self.N_User)).squeeze(),
