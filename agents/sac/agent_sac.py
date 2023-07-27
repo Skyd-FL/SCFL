@@ -224,7 +224,6 @@ class SAC(object):
                 # skip_avg += np.average(self.env.sample_skip)
 
                 if done:
-                    list_results.append([self.episode_sac, score])
                     state = self.env.reset()
                     break
 
@@ -245,7 +244,8 @@ class SAC(object):
                         critic_losses,
                     )
                     pass
-                scores.append(score)
+            scores.append(score)
+            list_results.append([self.episode_sac, score])
             print(f"Episode: {self.episode_sac}|Round:{self.ep_step}|"
                   f"Score {score / self.ep_step}|Penalty:{pen_tot / self.ep_step}|"
                   f"Energy:{E_tot / self.ep_step}|Iu:{Iu_tot / self.ep_step}|"
