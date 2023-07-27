@@ -64,7 +64,7 @@ class env_utils():
         Datarate = B_k np.log2(1+Numerator/Denominator)
         """
         mini_eps = 10 ** (-30)
-        Numerator = channelGain_BS_CU * self.p_u  # self.P must be a list among all users [1, ... , U]
+        Numerator = channelGain_BS_CU * (self.p_u+mini_eps)  # self.P must be a list among all users [1, ... , U]
         Denominator = self.B * self.beta * self.sigma + mini_eps  # self.B must be a list among all users [1, ... , U]
 
         DataRate = self.B * self.beta * np.log2(1 + (Numerator / Denominator))
