@@ -83,6 +83,7 @@ class SCFL_env(env_utils, env_agent_utils):
         """     Actions     """
         """ =============== """
         self.beta = np.random.randint(0, self.N_User, size=[self.N_User, 1])
+        self.beta = scipy.special.softmax(self.beta, axis=None)
         self.f_u = np.reshape((np.random.rand(1, self.N_User) * self.f_u_max), (self.N_User, 1))
         self.p_u = np.reshape((np.random.rand(1, self.N_User) * self.p_u_max), (self.N_User, 1))
         self.butt = np.reshape((np.random.rand(1, 1) * self.p_u_max), (1, 1))
