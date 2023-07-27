@@ -204,7 +204,7 @@ class SAC(object):
             self.ep_step = 0
             score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
             ES_avg, EC_avg, ET_avg = 0, 0, 0
-            beta_avg, p_avg, skip_avg, data_rate = 0, 0, 0, 0
+            beta_avg, p_avg, skip_avg, butt_avg, data_rate = 0, 0, 0, 0, 0
             actor_avg, critic_avg = 0, 0
 
             for step in range(1, max_step + 1):
@@ -217,9 +217,9 @@ class SAC(object):
                 score = score + reward
                 pen_tot += self.env.penalty
                 E_tot += self.env.E
-                ET_avg += np.sum(self.env.ET_u)
-                EC_avg += np.sum(self.env.EC_u)
-                ES_avg += np.sum(self.env.ES_u)
+                ET_avg += np.average(self.env.ET_u)
+                EC_avg += np.average(self.env.EC_u)
+                ES_avg += np.average(self.env.ES_u)
                 Iu_tot += self.env.num_Iu
                 IG_tot += self.env.num_Iglob
                 T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
@@ -227,6 +227,7 @@ class SAC(object):
                 p_avg += np.average(self.env.p_u)
                 data_rate += np.average(self.env.DataRate)
                 skip_avg += np.average(self.env.sample_skip)
+                butt_avg += np.average(self.env.butt)
 
                 if done:
                     state = self.env.reset()
@@ -252,11 +253,12 @@ class SAC(object):
             scores.append(score)
             list_results.append([self.episode_sac, score, T_tot / self.ep_step, E_tot / self.ep_step,
                                  EC_avg / self.ep_step, ET_avg / self.ep_step, ES_avg / self.ep_step,
+                                 IG_tot/self.ep_step, butt_avg / self.ep_step,
                                  skip_avg/self.ep_step, p_avg / self.ep_step, data_rate*10e-6/self.ep_step])
             print(f"Episode: {self.episode_sac}|Round:{self.ep_step}|"
                   f"Score {score / self.ep_step}|Penalty:{pen_tot / self.ep_step}|"
                   f"Energy:{E_tot / self.ep_step}|E Comp:{EC_avg / self.ep_step}|E Comm:{ET_avg / self.ep_step}|"
-                  f"E Sample:{ES_avg / self.ep_step}|Iu:{Iu_tot / self.ep_step}|"
+                  f"E Sample:{ES_avg / self.ep_step}|Iu:{Iu_tot / self.ep_step}|LocAcc:{butt_avg/self.ep_step}|"
                   f"IG:{IG_tot/self.ep_step}|E_tot:{E_tot / self.ep_step * IG_tot}|"
                   f"p_avg:{p_avg / self.ep_step}|Trans Time:{T_tot / self.ep_step}|Skip:{skip_avg/self.ep_step}")
             print(f"beta: {self.env.beta}")
@@ -277,7 +279,7 @@ class SAC(object):
                   item_name=algo_name,
                   folder_name=self.algo_path)
         df_results = pd.DataFrame(list_results, columns=['episode', 'score', 't_avg', 'e_avg',
-                                                         'ec_avg', 'et_avg', 'es_avg',
+                                                         'ec_avg', 'et_avg', 'es_avg', 'IG', 'local_acc'
                                                          'skip', 'p_avg', 'rate_avg'])
         result_path = "./results/"
         file_path = result_path + "{}.csv".format(algo_name)
