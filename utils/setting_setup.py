@@ -60,6 +60,8 @@ def get_arguments():
                         help="Lipschitz smooth variables")
     parser.add_argument("--sample-delay", type=float, default=0.1,
                         help="Delay of real-time sampling")
+    parser.add_argument("--sample-coeff", type=float, default=0.003,
+                        help="Amount of energy consumption for each data sample")
     parser.add_argument("--skip-max", type=float, default=100,
                         help="Max sample skip")
 
