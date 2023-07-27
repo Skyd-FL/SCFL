@@ -279,7 +279,7 @@ class SAC(object):
                   item_name=algo_name,
                   folder_name=self.algo_path)
         df_results = pd.DataFrame(list_results, columns=['episode', 'score', 't_avg', 'e_avg',
-                                                         'ec_avg', 'et_avg', 'es_avg', 'IG', 'local_acc'
+                                                         'ec_avg', 'et_avg', 'es_avg', 'IG', 'local_acc',
                                                          'skip', 'p_avg', 'rate_avg'])
         result_path = "./results/"
         file_path = result_path + "{}.csv".format(algo_name)
