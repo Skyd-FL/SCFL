@@ -117,4 +117,4 @@ class env_utils():
         # Calculate transmission energy
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u, self.t_trans)
-        return np.sum(self.ET_u)+np.sum(self.EC_u)+ES_u
+        return np.sum(self.ET_u)+np.sum(self.EC_u)+self.ES_u
