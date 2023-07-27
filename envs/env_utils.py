@@ -112,9 +112,9 @@ class env_utils():
         self.DataRate = self._calculateDataRate(self.ChannelGain.reshape(1, -1))
         # Calculate computation energy
         self.factor_Iu, self.num_Iu = self._calculateLocalIteration()  # Local Iterations
-        self.EC_u = self.num_Iu * self.kappa * self.C_u * self.D_u * self.f_u ** 2
+        self.EC_u = self.num_Iu * self.kappa*self.C_u*self.D_u*(self.f_u**2)
+        self.ES_u = (self.S_coeff*self.D_u*self.sample_delay*self.sample_skip)
         # Calculate transmission energy
         self.t_trans = self._calTimeTrans()
         self.ET_u = np.multiply(self.p_u, self.t_trans)
-
-        return np.sum(self.ET_u)        # np.sum(self.EC_u) +
+        return np.sum(self.ET_u)+np.sum(self.EC_u)+ES_u
