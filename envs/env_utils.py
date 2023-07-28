@@ -68,8 +68,6 @@ class env_utils():
         Denominator = self.B * self.beta * self.sigma + mini_eps  # self.B must be a list among all users [1, ... , U]
 
         DataRate = self.B * self.beta * np.log2(1 + (Numerator / Denominator))
-        DataRate[DataRate == 0] = 10e-28
-
         return DataRate
 
     def _calculateGlobalIteration(self):
