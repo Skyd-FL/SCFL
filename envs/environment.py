@@ -130,8 +130,7 @@ class SCFL_env(env_utils, env_agent_utils):
             print(f"local_acc:{self.butt}|skip:{self.sample_skip}")
         self.Au = self.factor_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
         # Penalty 1:
-        # penalty += max(np.sum(((self.Au / self.f_u + self.t_trans) - self.Time_max)), 0)
-        # penalty += 0.01*self.num_Iglob
+        penalty += max(np.sum((self.Au / self.f_u + self.t_trans) - self.Time_max), 0)
         self.penalty = penalty
         reward = self.num_Iglob * (-self.E + self.pen_coeff * penalty)  # Minimize E / Minimize num_Iglob / Minimize penalty
         # reward = - np.average(self.t_trans)
