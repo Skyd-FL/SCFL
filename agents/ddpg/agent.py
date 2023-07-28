@@ -252,7 +252,9 @@ class DDPGAgent:
                 reward_list,
                 algo_name
             )
-        df_results = pd.DataFrame(list_results, columns=['episode', 'score'])
+        df_results = pd.DataFrame(list_results, columns=['episode', 'score', 't_avg', 'e_avg',
+                                                         'ec_avg', 'et_avg', 'es_avg', 'IG', 'local_acc',
+                                                         'skip', 'p_avg', 'rate_avg'])
         result_path = "./results/"
         file_path = result_path + "{}.csv".format(algo_name)
         df_results.to_csv(file_path)
