@@ -163,7 +163,7 @@ class DDPGAgent:
         num_frames = args.max_step
         plotting_interval = args.plot_interval
         self.total_step = 0
-        algo_name = str(num_episode) + "-" + str(max_step) + \
+        algo_name = str(num_ep) + "-" + str(num_frames) + \
                     "-" + str(args.user_num) + "-" + str(args.pen_coeff) + \
                     "-" + args.drl_algo + "-" + str(args.batch_size) + \
                     "-" + args.ai_network + "-" + args.algo + "-" + str(args.poweru_max)
