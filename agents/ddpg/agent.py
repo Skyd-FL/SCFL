@@ -179,7 +179,8 @@ class DDPGAgent:
             state = self.env.reset()
             self.local_step = 0
             score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
-            beta_avg, p_avg, skip_avg = 0, 0, 0
+            ES_avg, EC_avg, ET_avg = 0, 0, 0
+            beta_avg, p_avg, skip_avg, butt_avg, data_rate = 0, 0, 0, 0, 0
             actor_avg, critic_avg = 0, 0
 
             for step in range(1, num_frames + 1):
@@ -192,12 +193,18 @@ class DDPGAgent:
                 score = score + reward
                 pen_tot += self.env.penalty
                 E_tot += self.env.E
+                ET_avg += np.average(self.env.ET_u)
+                EC_avg += np.average(self.env.EC_u)
+                ES_avg += np.average(self.env.ES_u)
                 Iu_tot += self.env.num_Iu
-                # IG_tot += self.env.num_Iglob
+                IG_tot += self.env.num_Iglob
                 T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
                 beta_avg += np.average(self.env.beta)
                 p_avg += np.average(self.env.p_u)
-                # skip_avg += np.average(self.env.sample_skip)
+                data_rate += np.average(self.env.DataRate)
+                skip_avg += np.average(self.env.sample_skip)
+                butt_avg += np.average(self.env.butt)
+
 
                 # if training is ready
                 if (
@@ -222,14 +229,21 @@ class DDPGAgent:
                 if done:
                     break
             scores.append(score)
-            list_results.append([self.episode, score])
+            list_results.append([self.episode, score, T_tot / self.local_step, E_tot / self.local_step,
+                                 EC_avg / self.local_step, ET_avg / self.local_step, ES_avg / self.local_step,
+                                 IG_tot/self.local_step, butt_avg / self.local_step,
+                                 skip_avg/self.local_step, p_avg / self.local_step, data_rate*10e-6/self.local_step])
             print(f"Episode: {self.episode}|Round:{self.local_step}|"
                   f"Score {score / self.local_step}|Penalty:{pen_tot / self.local_step}|"
-                  f"Energy:{E_tot / self.local_step}|Iu:{Iu_tot / self.local_step}|"
-                  f"IG:{self.local_step}|E_tot:{E_tot / self.local_step * IG_tot}|"
-                  f"p_avg:{p_avg / self.local_step}|Trans Time:{T_tot / self.local_step}")
+                  f"Energy:{E_tot / self.local_step}|E Comp:{EC_avg / self.local_step}|E Comm:{ET_avg / self.local_step}|"
+                  f"E Sample:{ES_avg / self.local_step}|Iu:{Iu_tot / self.local_step}|LocAcc:{butt_avg/self.local_step}|"
+                  f"IG:{IG_tot/self.local_step}|E_tot:{E_tot / self.local_step * IG_tot}|"
+                  f"p_avg:{p_avg / self.local_step}|Trans Time:{T_tot / self.local_step}|Skip:{skip_avg/self.local_step}")
+            print(f"beta: {self.env.beta}")
+            print(f"pow: {self.env.p_u}|rate:{data_rate*10e-6/self.local_step}")
             if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
                 print(f"actor: {actor_avg / self.local_step}|critic: {critic_avg / self.local_step}")
+            print("======================================")
         if args.save_flag:
             save_results(
                 scores,
