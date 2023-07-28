@@ -266,18 +266,18 @@ class SAC(object):
             if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
                 print(f"actor: {actor_avg / self.ep_step}|critic: {critic_avg / self.ep_step}")
             print("======================================")
-        if args.save_flag:
-            save_results(
-                scores,
-                actor_losses,
-                critic_losses,
-                reward_list,
-                algo_name
-            )
-        save_item(item_actor=self.actor,
-                  item_critic=self.critic,
-                  item_name=algo_name,
-                  folder_name=self.algo_path)
+        # if args.save_flag:
+        #     save_results(
+        #         scores,
+        #         actor_losses,
+        #         critic_losses,
+        #         reward_list,
+        #         algo_name
+        #     )
+        # save_item(item_actor=self.actor,
+        #           item_critic=self.critic,
+        #           item_name=algo_name,
+        #           folder_name=self.algo_path)
         df_results = pd.DataFrame(list_results, columns=['episode', 'score', 't_avg', 'e_avg',
                                                          'ec_avg', 'et_avg', 'es_avg', 'IG', 'local_acc',
                                                          'skip', 'p_avg', 'rate_avg'])
