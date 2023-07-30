@@ -13,7 +13,7 @@ from utils.func_utils import *
 class SCFL_env(env_utils, env_agent_utils):
     def __init__(self, args):
         # Network setting
-        self.noise = args.noise
+        self.sigma_data = 0.1
         self.lamda = convert_mhz_to_m(args.freq_carrier)
         self.freq_carrier = args.freq_carrier * (10**6)
         self.N_User = args.user_num
@@ -22,12 +22,11 @@ class SCFL_env(env_utils, env_agent_utils):
         self.Num_BS = 1  # Number of Base Stations
         self.max_step = args.max_step
         self.Z_u = 10000  # Data size
-        self.sigma_data = 0.01
 
         # Power setting
         self.p_u_max = args.poweru_max
         self.eta = 0.7  # de tinh R_u
-        self.sigma = 3.9811 * (10 ** (-21))  # -174 dBm/Hz -> W/Hz
+        self.N0 = 3.9811 * (10 ** (-21))  # -174 dBm/Hz -> W/Hz
         # Bandwidth
         self.B = args.bandwidth
 
