@@ -13,7 +13,7 @@ from utils.func_utils import *
 class SCFL_env(env_utils, env_agent_utils):
     def __init__(self, args):
         # Network setting
-        self.sigma_data = 0.1
+        self.sigma_data = 0.01
         self.lamda = convert_mhz_to_m(args.freq_carrier)
         self.freq_carrier = args.freq_carrier * (10**6)
         self.N_User = args.user_num
