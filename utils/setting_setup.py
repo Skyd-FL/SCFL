@@ -46,8 +46,8 @@ def get_arguments():
     parser.add_argument("--drl-algo", choices=['ddpg-ei', 'ddpg'],
                         default='ddpg-ei',
                         help="choice of DRL algorithm")
-    parser.add_argument("--noise", type=float, default=0.01,
-                        help="network noise")
+    # parser.add_argument("--noise", type=float, default=0.01,
+    #                     help="network noise")
     parser.add_argument("--user-num", type=int, default=10,
                         help="number of users")
     parser.add_argument("--freq-carrier", type=float, default=2500,
