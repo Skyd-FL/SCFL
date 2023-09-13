@@ -9,6 +9,8 @@ def mW2dBm(mW):
 def dBm2mW(dBm):
     return 10 ** ((dBm) / 10.)
 
+def dBm2W(dBm):
+    return 10 ** (dBm / 10) / 1000
 
 def convert_mhz_to_m(wavelength_mhz):
     speed_of_light = 299792458  # meters per second
