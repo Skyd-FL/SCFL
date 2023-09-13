@@ -24,7 +24,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.Z_u = 10000  # Data size
 
         # Power setting
-        self.p_u_max = args.poweru_max
+        self.p_u_max = dBm2W(args.poweru_max)
         self.eta = 0.7  # de tinh R_u
         self.N0 = 3.9811 * (10 ** (-21))  # -174 dBm/Hz -> W/Hz
         # Bandwidth
