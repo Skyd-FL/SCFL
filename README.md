@@ -1,6 +1,6 @@
 # The official implementation of 
-## Sample-Driven Control for Federated Learning for IoT Network with Real-Time Sensing 
-Ngoc-Minh Luu, Minh-Duong Nguyen, Ebrahim Bedeer Mohamed, Nguyen Van Duc, and Quoc-Viet~Pham
+## Sample-Driven Federated Learning for Energy-Efficient and Real-Time IoT Sensing
+Ngoc-Minh Luu, Minh-Duong Nguyen, Ebrahim Bedeer Mohamed, Dinh Thai Hoang, Diep-N.-Nguyen, Nguyen Van Duc, and Quoc-Viet~Pham
 
 ## Running code
 ####
