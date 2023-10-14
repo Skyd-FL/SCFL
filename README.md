@@ -6,6 +6,7 @@ https://arxiv.org/abs/2310.07497
 
 Anyone re-use the code please cite the followings: 
 
+```
 @misc{luu2023sampledriven,
       title={Sample-Driven Federated Learning for Energy-Efficient and Real-Time IoT Sensing}, 
       author={Minh Ngoc Luu and Minh-Duong Nguyen and Ebrahim Bedeer and Van Duc Nguyen and Dinh Thai Hoang and Diep N. Nguyen and Quoc-Viet Pham},
@@ -13,6 +14,7 @@ Anyone re-use the code please cite the followings:
       month={Oct.},
       primaryClass={cs.LG}
 }
+```
 
 ## Running code
 ####
