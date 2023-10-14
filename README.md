@@ -1,6 +1,18 @@
 # The official implementation of 
-## Sample-Driven Federated Learning for Energy-Efficient and Real-Time IoT Sensing
+## Sample-Driven Federated Learning for Energy-Efficient and Real-Time IoT Sensing 
 Ngoc-Minh Luu, Minh-Duong Nguyen, Ebrahim Bedeer Mohamed, Dinh Thai Hoang, Diep-N.-Nguyen, Nguyen Van Duc, and Quoc-Viet~Pham
+
+https://arxiv.org/abs/2310.07497
+
+Anyone re-use the code please cite the followings: 
+
+@misc{luu2023sampledriven,
+      title={Sample-Driven Federated Learning for Energy-Efficient and Real-Time IoT Sensing}, 
+      author={Minh Ngoc Luu and Minh-Duong Nguyen and Ebrahim Bedeer and Van Duc Nguyen and Dinh Thai Hoang and Diep N. Nguyen and Quoc-Viet Pham},
+      year={2023},
+      month={Oct.},
+      primaryClass={cs.LG}
+}
 
 ## Running code
 ####
