@@ -52,7 +52,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.xi = 0.5
         self.Time_max = args.tmax  # max time per round
         self.sample_delay = args.sample_delay
-        self.sample_skip = args.sample_coeff
+        self.sample_skip = 1
         self.S_coeff = args.sample_coeff
 
         # AI Model/Dataset Coefficient
