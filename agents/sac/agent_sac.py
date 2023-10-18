@@ -191,6 +191,8 @@ class SAC(object):
                     "-" + args.ai_network + "-" + args.algo + "-" + str(args.poweru_max) + \
                     "-" + str(args.global_acc) + "-" + str(args.f_u_max) + "-" + str(args.data_size) + \
                     "-" + str(args.skip_max)
+        print(algo_name)
+
         """Train the agent."""
         list_results = []
         actor_losses = []
