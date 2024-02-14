@@ -13,6 +13,7 @@ from utils.func_utils import *
 class SCFL_env(env_utils, env_agent_utils):
     def __init__(self, args):
         # Network setting
+        self.num_Iglob = None
         self.sigma_data = 0.01
         self.lamda = convert_mhz_to_m(args.freq_carrier)
         self.freq_carrier = args.freq_carrier * (10**6)
@@ -135,7 +136,7 @@ class SCFL_env(env_utils, env_agent_utils):
         reward = self.num_Iglob * (-self.E - self.pen_coeff * penalty)  # Minimize E / Minimize num_Iglob / Minimize penalty
         # reward = - np.average(self.t_trans)
         # Stop at Maximum Glob round
-        if (step == self.max_step):  #  or (step == self.num_Iglob):
+        if step == self.max_step:  #  or (step == self.num_Iglob):
             done = True
         else:
             done = False

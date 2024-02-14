@@ -137,4 +137,18 @@ def get_arguments():
                         help='Global accuracy of system (default: 0.01)')
     parser.add_argument('--tmax', type=int, default=10, metavar='T_max',
                         help='Upper bound of time completion (default: 1000)')
+
+    # LOGGING
+    parser.add_argument('--wandb', action='store_true',
+        help='toggle to use wandb for online saving')
+    parser.add_argument('--log', action='store_true',
+        help='toggle to use tensorboard for offline saving')
+    parser.add_argument('--wandb_prj', type=str, default="SCFL",
+        help='toggle to use wandb for online saving')
+    parser.add_argument('--wandb_entity', type=str, default="scalemind",
+        help='toggle to use wandb for online saving')
+    parser.add_argument("--verbose", action="store_true",
+                        help="printout mode")
+
+
     return parser.parse_args()

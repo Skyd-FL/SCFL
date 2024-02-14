@@ -5,6 +5,7 @@ from agents.ddpg.modules.core import *
 import matplotlib.pyplot as plt
 from typing import Dict, List, Tuple
 from utils.result_utils import *
+from utils.logging import *
 
 
 class DDPGAgent:
@@ -25,7 +26,7 @@ class DDPGAgent:
         initial_random_steps (int): initial random action steps
         noise (OUNoise): noise generator for exploration
         device (torch.device): cpu / gpu
-        transition (list): temporory storage for the recent transition
+        transition (list): temporary storage for the recent transition
         total_step (int): total step numbers
         is_test (bool): flag to show the current mode (train / test)
     """
@@ -88,6 +89,9 @@ class DDPGAgent:
         self.episode = 0
         # mode: train / test
         self.is_test = False
+
+        # Setup
+        self.log_interface = Logging(args)
 
     def select_action(self, state: np.ndarray) -> np.ndarray:
         """Select an action from the input state."""
@@ -206,7 +210,6 @@ class DDPGAgent:
                 skip_avg += np.average(self.env.sample_skip)
                 butt_avg += np.average(self.env.butt)
 
-
                 # if training is ready
                 if (
                         len(self.memory) >= self.batch_size
@@ -232,27 +235,49 @@ class DDPGAgent:
             scores.append(score)
             list_results.append([self.episode, score, T_tot / self.local_step, E_tot / self.local_step,
                                  EC_avg / self.local_step, ET_avg / self.local_step, ES_avg / self.local_step,
-                                 IG_tot/self.local_step, butt_avg / self.local_step,
-                                 skip_avg/self.local_step, p_avg / self.local_step, data_rate*10e-6/self.local_step])
+                                 IG_tot / self.local_step, butt_avg / self.local_step,
+                                 skip_avg / self.local_step, p_avg / self.local_step,
+                                 data_rate * 10e-6 / self.local_step])
             print(f"Episode: {self.episode}|Round:{self.local_step}|"
                   f"Score {score / self.local_step}|Penalty:{pen_tot / self.local_step}|"
                   f"Energy:{E_tot / self.local_step}|E Comp:{EC_avg / self.local_step}|E Comm:{ET_avg / self.local_step}|"
-                  f"E Sample:{ES_avg / self.local_step}|Iu:{Iu_tot / self.local_step}|LocAcc:{butt_avg/self.local_step}|"
-                  f"IG:{IG_tot/self.local_step}|E_tot:{E_tot / self.local_step * IG_tot}|"
-                  f"p_avg:{p_avg / self.local_step}|Trans Time:{T_tot / self.local_step}|Skip:{skip_avg/self.local_step}")
+                  f"E Sample:{ES_avg / self.local_step}|Iu:{Iu_tot / self.local_step}|LocAcc:{butt_avg / self.local_step}|"
+                  f"IG:{IG_tot / self.local_step}|E_tot:{E_tot / self.local_step * IG_tot}|"
+                  f"p_avg:{p_avg / self.local_step}|Trans Time:{T_tot / self.local_step}|Skip:{skip_avg / self.local_step}")
             print(f"beta: {self.env.beta}")
-            print(f"pow: {self.env.p_u}|rate:{data_rate*10e-6/self.local_step}")
+            print(f"pow: {self.env.p_u}|rate:{data_rate * 10e-6 / self.local_step}")
             if len(self.memory) >= self.batch_size and self.total_step > self.initial_random_steps:
                 print(f"actor: {actor_avg / self.local_step}|critic: {critic_avg / self.local_step}")
             print("======================================")
-        # if args.save_flag:
-        #     save_results(
-        #         scores,
-        #         actor_losses,
-        #         critic_losses,
-        #         reward_list,
-        #         algo_name
-        #     )
+
+        if args.eval:
+            if self.total_step > self.initial_random_steps:
+                score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
+                ES_avg, EC_avg, ET_avg = 0, 0, 0
+                beta_avg, p_avg, skip_avg, butt_avg, data_rate = 0, 0, 0, 0, 0
+                for ep_eval in range(50):
+                    for step in range(1, num_frames + 1):
+                        self.total_step += 1
+                        self.local_step += 1
+                        action = self.select_action(state)
+                        state_next, reward, done, info = self.step(action)
+                        state = state_next
+
+                        score = score + reward
+                        pen_tot += self.env.penalty
+                        E_tot += self.env.E
+                        ET_avg += np.average(self.env.ET_u)
+                        EC_avg += np.average(self.env.EC_u)
+                        ES_avg += np.average(self.env.ES_u)
+                        Iu_tot += self.env.num_Iu
+                        IG_tot += self.env.num_Iglob
+                        T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
+                        beta_avg += np.average(self.env.beta)
+                        p_avg += np.average(self.env.p_u)
+                        data_rate += np.average(self.env.DataRate)
+                        skip_avg += np.average(self.env.sample_skip)
+                        butt_avg += np.average(self.env.butt)
+
         df_results = pd.DataFrame(list_results, columns=['episode', 'score', 't_avg', 'e_avg',
                                                          'ec_avg', 'et_avg', 'es_avg', 'IG', 'local_acc',
                                                          'skip', 'p_avg', 'rate_avg'])
