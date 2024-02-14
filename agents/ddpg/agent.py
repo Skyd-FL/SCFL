@@ -251,32 +251,39 @@ class DDPGAgent:
             print("======================================")
 
         if args.eval:
-            if self.total_step > self.initial_random_steps:
-                score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
-                ES_avg, EC_avg, ET_avg = 0, 0, 0
-                beta_avg, p_avg, skip_avg, butt_avg, data_rate = 0, 0, 0, 0, 0
-                for ep_eval in range(50):
-                    for step in range(1, num_frames + 1):
-                        self.total_step += 1
-                        self.local_step += 1
-                        action = self.select_action(state)
-                        state_next, reward, done, info = self.step(action)
-                        state = state_next
+            vary_dict = {
+                "power": [1],
+                "bandwidth": [1],
+            }
+            for key in vary_dict.keys():
+                for vary_val in vary_dict[key]:
+                    self.env.set_attribute(key, vary_val)
+                    score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
+                    ES_avg, EC_avg, ET_avg = 0, 0, 0
+                    beta_avg, p_avg, skip_avg, butt_avg, data_rate = 0, 0, 0, 0, 0
+                    for ep_eval in range(50):
+                        state = self.env.reset()
+                        for step in range(1, num_frames + 1):
+                            self.total_step += 1
+                            self.local_step += 1
+                            action = self.select_action(state)
+                            state_next, reward, done, info = self.step(action)
+                            state = state_next
 
-                        score = score + reward
-                        pen_tot += self.env.penalty
-                        E_tot += self.env.E
-                        ET_avg += np.average(self.env.ET_u)
-                        EC_avg += np.average(self.env.EC_u)
-                        ES_avg += np.average(self.env.ES_u)
-                        Iu_tot += self.env.num_Iu
-                        IG_tot += self.env.num_Iglob
-                        T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
-                        beta_avg += np.average(self.env.beta)
-                        p_avg += np.average(self.env.p_u)
-                        data_rate += np.average(self.env.DataRate)
-                        skip_avg += np.average(self.env.sample_skip)
-                        butt_avg += np.average(self.env.butt)
+                            score = score + reward
+                            pen_tot += self.env.penalty
+                            E_tot += self.env.E
+                            ET_avg += np.average(self.env.ET_u)
+                            EC_avg += np.average(self.env.EC_u)
+                            ES_avg += np.average(self.env.ES_u)
+                            Iu_tot += self.env.num_Iu
+                            IG_tot += self.env.num_Iglob
+                            T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
+                            beta_avg += np.average(self.env.beta)
+                            p_avg += np.average(self.env.p_u)
+                            data_rate += np.average(self.env.DataRate)
+                            skip_avg += np.average(self.env.sample_skip)
+                            butt_avg += np.average(self.env.butt)
 
         df_results = pd.DataFrame(list_results, columns=['episode', 'score', 't_avg', 'e_avg',
                                                          'ec_avg', 'et_avg', 'es_avg', 'IG', 'local_acc',

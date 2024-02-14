@@ -156,6 +156,12 @@ class SCFL_env(env_utils, env_agent_utils):
         state_next = self._wrapState()
         return state_next
 
+    def set_attribute(self, key, val):
+        if hasattr(self, key):
+            setattr(self, key, val)
+        else:
+            print(f"{key} is not an attribute of the class.")
+
 
 if __name__ == '__main__':
     args = get_arguments()
