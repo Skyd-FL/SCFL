@@ -45,3 +45,4 @@ else:
         env
     )
 agent.train(args)
+agent.evaluate(args)

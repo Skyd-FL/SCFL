@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from typing import Dict, List, Tuple
 from utils.result_utils import *
 from utils.logging import *
+from envs.commcal_utils import *
+import pickle
 
 
 class DDPGAgent:
@@ -250,41 +252,6 @@ class DDPGAgent:
                 print(f"actor: {actor_avg / self.local_step}|critic: {critic_avg / self.local_step}")
             print("======================================")
 
-        if args.eval:
-            vary_dict = {
-                "power": [1],
-                "bandwidth": [1],
-            }
-            for key in vary_dict.keys():
-                for vary_val in vary_dict[key]:
-                    self.env.set_attribute(key, vary_val)
-                    score, pen_tot, E_tot, Iu_tot, IG_tot, T_tot = 0, 0, 0, 0, 0, 0
-                    ES_avg, EC_avg, ET_avg = 0, 0, 0
-                    beta_avg, p_avg, skip_avg, butt_avg, data_rate = 0, 0, 0, 0, 0
-                    for ep_eval in range(50):
-                        state = self.env.reset()
-                        for step in range(1, num_frames + 1):
-                            self.total_step += 1
-                            self.local_step += 1
-                            action = self.select_action(state)
-                            state_next, reward, done, info = self.step(action)
-                            state = state_next
-
-                            score = score + reward
-                            pen_tot += self.env.penalty
-                            E_tot += self.env.E
-                            ET_avg += np.average(self.env.ET_u)
-                            EC_avg += np.average(self.env.EC_u)
-                            ES_avg += np.average(self.env.ES_u)
-                            Iu_tot += self.env.num_Iu
-                            IG_tot += self.env.num_Iglob
-                            T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
-                            beta_avg += np.average(self.env.beta)
-                            p_avg += np.average(self.env.p_u)
-                            data_rate += np.average(self.env.DataRate)
-                            skip_avg += np.average(self.env.sample_skip)
-                            butt_avg += np.average(self.env.butt)
-
         df_results = pd.DataFrame(list_results, columns=['episode', 'score', 't_avg', 'e_avg',
                                                          'ec_avg', 'et_avg', 'es_avg', 'IG', 'local_acc',
                                                          'skip', 'p_avg', 'rate_avg'])
@@ -297,28 +264,83 @@ class DDPGAgent:
         #           self.critic.state_dict(),
         #           algo_name)
 
-    def test(self):
-        # """Test the agent."""
-        # self.is_test = True
+    def evaluate(self, args):
+        default_dict = {
+            "p_u_max": dBm2W(10),
+            "B": 20e6,
+            "skip_max": 100,
+            "f_u_max": 2e9,
+        }
+        vary_dict = {
+            "p_u_max": [dBm2W(10), dBm2W(11), dBm2W(12), dBm2W(13), dBm2W(14), dBm2W(15),
+                        dBm2W(16), dBm2W(17), dBm2W(18), dBm2W(19), dBm2W(20)],
+            "B": [20e6, 40e6, 60e6, 80e6, 100e6, 120e6],
+            "skip_max": [20, 40, 60, 80, 100],
+            "f_u_max": [2e9, 4e9, 6e9, 8e9, 10e9, 12e9, 14e9, 16e9],
+        }
+        average_dict = {
+            "p_u_max": {
+                "E_tot": [],
+                "ET_avg": [],
+                "EC_avg": [],
+                "ES_avg": [],
+                "T_tot": [],
+            },
+            "B": {
+                "E_tot": [],
+                "ET_avg": [],
+                "EC_avg": [],
+                "ES_avg": [],
+                "T_tot": [],
+            },
+            "skip_max": {
+                "E_tot": [],
+                "ET_avg": [],
+                "EC_avg": [],
+                "ES_avg": [],
+                "T_tot": [],
+            },
+            "f_u_max": {
+                "E_tot": [],
+                "ET_avg": [],
+                "EC_avg": [],
+                "ES_avg": [],
+                "T_tot": [],
+            },
+        }
+        ep_eval_total = 50
+        step_eval_total = 200
 
-        # state = self.env.reset()
-        # done = False
-        # score = 0
+        for key in vary_dict.keys():
+            for vary_val in vary_dict[key]:
+                """ Set default for all keys first """
+                for d_key in default_dict.keys():
+                    self.env.set_attribute(d_key, default_dict[d_key])
+                self.env.set_attribute(key, vary_val)
+                Iu_tot, IG_tot, T_tot = 0, 0, 0
+                E_tot, ES_avg, EC_avg, ET_avg = 0, 0, 0, 0
+                for ep_eval in range(ep_eval_total):
+                    state = self.env.reset()
+                    for step in range(step_eval_total):
+                        action = self.select_action(state)
+                        state_next, reward, done, info = self.step(action)
+                        state = state_next
 
-        # frames = []
-        # while not done:
-        #     frames.append(self.env.render(mode="rgb_array"))
-        #     action = self.select_action(state)
-        #     next_state, reward, done = self.step(action)
+                        E_tot += self.env.E
+                        ET_avg += np.average(self.env.ET_u)
+                        EC_avg += np.average(self.env.EC_u)
+                        ES_avg += np.average(self.env.ES_u)
+                        Iu_tot += self.env.num_Iu
+                        IG_tot += self.env.num_Iglob
+                        T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
+                average_dict[key]["E_tot"].append(E_tot/(ep_eval_total*step_eval_total))
+                average_dict[key]["ET_avg"].append(E_tot / (ep_eval_total * step_eval_total))
+                average_dict[key]["EC_avg"].append(E_tot / (ep_eval_total * step_eval_total))
+                average_dict[key]["ES_avg"].append(E_tot / (ep_eval_total * step_eval_total))
+                average_dict[key]["T_tot"].append(E_tot / (ep_eval_total * step_eval_total))
 
-        #     state = next_state
-        #     score = self.discount*score + reward
-
-        # print("score: ", score)
-        # self.env.close()
-
-        # return frames
-        pass
+        with open(f'./results/experimental_eval.pkl', 'wb') as pickle_file:
+            pickle.dump(my_dict, pickle_file)
 
     def _target_soft_update(self):
         """Soft-update: target = tau*local + (1-tau)*target."""

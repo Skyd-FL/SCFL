@@ -61,7 +61,7 @@ class env_utils():
         SNR = Numerator / Denominator
         Numerator = H_k * P_k
         Denominator = N_0 * B_k
-        Datarate = B_k np.log2(1+Numerator/Denominator)
+        Data-rate = B_k np.log2(1+Numerator/Denominator)
         """
         mini_eps = 10 ** (-30)
         Numerator = channelGain_BS_CU * (self.p_u+mini_eps)  # self.P must be a list among all users [1, ... , U]

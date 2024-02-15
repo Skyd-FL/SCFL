@@ -16,7 +16,7 @@ class SCFL_env(env_utils, env_agent_utils):
         self.num_Iglob = None
         self.sigma_data = 0.01
         self.lamda = convert_mhz_to_m(args.freq_carrier)
-        self.freq_carrier = args.freq_carrier * (10**6)
+        self.freq_carrier = args.freq_carrier * (10 ** 6)
         self.N_User = args.user_num
         self.G_CU_list = np.ones((self.N_User, 1))  # User directivity
         self.G_BS_t = 1  # BS directivity
@@ -43,10 +43,10 @@ class SCFL_env(env_utils, env_agent_utils):
         self.C_u = np.random.uniform(low=self.low_freq, high=self.high_freq, size=self.N_User)
         self.D_u = 500
 
-        self.pen_coeff = args.pen_coeff  # coefficient of penalty defined by lamba in paper
+        self.pen_coeff = args.pen_coeff  # coefficient of penalty defined by lamda in paper
         self.data_size = args.data_size
         # effective switched capacitance that depends on the chip architecture
-        self.kappa = 10**(-28)
+        self.kappa = 10 ** (-28)
         self.f_u_max = args.f_u_max
         self.skip_max = args.skip_max
 
@@ -133,10 +133,11 @@ class SCFL_env(env_utils, env_agent_utils):
         penalty += max(np.sum((self.Au / self.f_u + self.t_trans) - self.Time_max), 0)
         # penalty += max(np.sum(self.t_trans - self.Time_max), 0)
         self.penalty = penalty
-        reward = self.num_Iglob * (-self.E - self.pen_coeff * penalty)  # Minimize E / Minimize num_Iglob / Minimize penalty
+        reward = self.num_Iglob * (
+                    -self.E - self.pen_coeff * penalty)  # Minimize E / Minimize num_Iglob / Minimize penalty
         # reward = - np.average(self.t_trans)
         # Stop at Maximum Glob round
-        if step == self.max_step:  #  or (step == self.num_Iglob):
+        if step == self.max_step:  # or (step == self.num_Iglob):
             done = True
         else:
             done = False
