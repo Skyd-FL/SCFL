@@ -334,13 +334,13 @@ class DDPGAgent:
                         IG_tot += self.env.num_Iglob
                         T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
                 average_dict[key]["E_tot"].append(E_tot/(ep_eval_total*step_eval_total))
-                average_dict[key]["ET_avg"].append(E_tot / (ep_eval_total * step_eval_total))
-                average_dict[key]["EC_avg"].append(E_tot / (ep_eval_total * step_eval_total))
-                average_dict[key]["ES_avg"].append(E_tot / (ep_eval_total * step_eval_total))
-                average_dict[key]["T_tot"].append(E_tot / (ep_eval_total * step_eval_total))
+                average_dict[key]["ET_avg"].append(ET_avg / (ep_eval_total * step_eval_total))
+                average_dict[key]["EC_avg"].append(EC_avg / (ep_eval_total * step_eval_total))
+                average_dict[key]["ES_avg"].append(ES_avg / (ep_eval_total * step_eval_total))
+                average_dict[key]["T_tot"].append(T_tot / (ep_eval_total * step_eval_total))
 
         with open(f'./results/experimental_eval.pkl', 'wb') as pickle_file:
-            pickle.dump(my_dict, pickle_file)
+            pickle.dump(average_dict, pickle_file)
 
     def _target_soft_update(self):
         """Soft-update: target = tau*local + (1-tau)*target."""
