@@ -123,18 +123,19 @@ class SCFL_env(env_utils, env_agent_utils):
         self.U_location = self.User_trajectory + self.U_location
         state_next = self._wrapState()  # State wrap
         self.ChannelGain = self._ChannelGain_Calculate(self.sigma_data)  # Re-calculate channel gain
+
         self.E = self._Energy()  # Energy
-        # ============= Global Iter =============
+        """============= Global Iter ============="""
         self.num_Iglob = self._calculateGlobalIteration()  # Global Iterations
         if self.num_Iglob < 0:
             print(f"local_acc:{self.butt}|skip:{self.sample_skip}")
         self.Au = self.factor_Iu * self.C_u * self.D_u  # Iterations x Cycles x Samples
-        # Penalty 1:
+        """Penalty"""
         penalty += max(np.sum((self.Au / self.f_u + self.t_trans) - self.Time_max), 0)
         # penalty += max(np.sum(self.t_trans - self.Time_max), 0)
         self.penalty = penalty
-        reward = self.num_Iglob * (
-                    -self.E - self.pen_coeff * penalty)  # Minimize E / Minimize num_Iglob / Minimize penalty
+        """Minimize E / Minimize num_Iglob / Minimize penalty"""
+        reward = self.num_Iglob * (-self.E - self.pen_coeff * penalty)
         # reward = - np.average(self.t_trans)
         # Stop at Maximum Glob round
         if step == self.max_step:  # or (step == self.num_Iglob):

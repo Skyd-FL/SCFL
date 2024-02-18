@@ -44,5 +44,7 @@ else:
         args,
         env
     )
+# if train is true -> train
 agent.train(args)
+# if eval is true -> eval
 agent.evaluate(args)

@@ -289,6 +289,84 @@ class SAC(object):
         file_path = result_path + "{}.csv".format(algo_name)
         df_results.to_csv(file_path)
 
+    def evaluate(self, args):
+        default_dict = {
+            "p_u_max": dBm2W(10),
+            "B": 20e6,
+            "skip_max": 100,
+            "f_u_max": 2e9,
+        }
+        vary_dict = {
+            "p_u_max": [dBm2W(10), dBm2W(11), dBm2W(12), dBm2W(13), dBm2W(14), dBm2W(15),
+                        dBm2W(16), dBm2W(17), dBm2W(18), dBm2W(19), dBm2W(20)],
+            "B": [20e6, 40e6, 60e6, 80e6, 100e6, 120e6],
+            "skip_max": [20, 40, 60, 80, 100],
+            "f_u_max": [2e9, 4e9, 6e9, 8e9, 10e9, 12e9, 14e9, 16e9],
+        }
+        average_dict = {
+            "p_u_max": {
+                "E_tot": [],
+                "ET_avg": [],
+                "EC_avg": [],
+                "ES_avg": [],
+                "T_tot": [],
+            },
+            "B": {
+                "E_tot": [],
+                "ET_avg": [],
+                "EC_avg": [],
+                "ES_avg": [],
+                "T_tot": [],
+            },
+            "skip_max": {
+                "E_tot": [],
+                "ET_avg": [],
+                "EC_avg": [],
+                "ES_avg": [],
+                "T_tot": [],
+            },
+            "f_u_max": {
+                "E_tot": [],
+                "ET_avg": [],
+                "EC_avg": [],
+                "ES_avg": [],
+                "T_tot": [],
+            },
+        }
+        ep_eval_total = 50
+        step_eval_total = 200
+
+        for key in vary_dict.keys():
+            for vary_val in vary_dict[key]:
+                """ Set default for all keys first """
+                for d_key in default_dict.keys():
+                    self.env.set_attribute(d_key, default_dict[d_key])
+                self.env.set_attribute(key, vary_val)
+                Iu_tot, IG_tot, T_tot = 0, 0, 0
+                E_tot, ES_avg, EC_avg, ET_avg = 0, 0, 0, 0
+                for ep_eval in range(ep_eval_total):
+                    state = self.env.reset()
+                    for step in range(step_eval_total):
+                        action = self.select_action(state)
+                        state_next, reward, done, info = self.step(action)
+                        state = state_next
+
+                        E_tot += self.env.E
+                        ET_avg += np.average(self.env.ET_u)
+                        EC_avg += np.average(self.env.EC_u)
+                        ES_avg += np.average(self.env.ES_u)
+                        Iu_tot += self.env.num_Iu
+                        IG_tot += self.env.num_Iglob
+                        T_tot += np.sum(self.env.t_trans) / len(self.env.t_trans[0])
+                average_dict[key]["E_tot"].append(E_tot/(ep_eval_total*step_eval_total))
+                average_dict[key]["ET_avg"].append(ET_avg / (ep_eval_total * step_eval_total))
+                average_dict[key]["EC_avg"].append(EC_avg / (ep_eval_total * step_eval_total))
+                average_dict[key]["ES_avg"].append(ES_avg / (ep_eval_total * step_eval_total))
+                average_dict[key]["T_tot"].append(T_tot / (ep_eval_total * step_eval_total))
+
+        with open(f'./results/experimental_eval.pkl', 'wb') as pickle_file:
+            pickle.dump(average_dict, pickle_file)
+
     def _plot(
             self,
             frame_idx: int,
