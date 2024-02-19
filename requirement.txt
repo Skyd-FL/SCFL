@@ -1,0 +1,11 @@
+beautifultable
+numpy
+matplotlib
+seaborn
+Typing
+h5py
+wandb
+tensorboard
+scipy
+tensorflow
+scikit-learn
