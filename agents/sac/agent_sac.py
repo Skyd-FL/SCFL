@@ -348,7 +348,7 @@ class SAC(object):
                     state = self.env.reset()
                     for step in range(step_eval_total):
                         action = self.select_action(state)
-                        state_next, reward, done, info = self.step(action)
+                        state_next, reward, done, info = self.step(curr_obs=state, action=action)
                         state = state_next
 
                         E_tot += self.env.E
